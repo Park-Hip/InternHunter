@@ -1,0 +1,251 @@
+2026-02-03 13:25:58,576 - INFO - crawl_css.py - --- PHASE 1: CRAWL JOB LINKS STARTED ---
+2026-02-03 13:25:59,529 - INFO - crawl_css.py - Fetching links from: https://www.topcv.vn/tim-viec-lam-ai-engineer-kcr257?type_keyword=1
+2026-02-03 13:26:07,560 - INFO - crawl_css.py - Found 50 jobs.
+2026-02-03 13:26:07,709 - ERROR - crawl_css.py - Phase 1 Critical Error: unable to open database file
+2026-02-03 13:31:03,081 - INFO - crawl_css.py - --- PHASE 1: CRAWL JOB LINKS STARTED ---
+2026-02-03 13:31:03,477 - INFO - crawl_css.py - Fetching links from: https://www.topcv.vn/tim-viec-lam-ai-engineer-kcr257?type_keyword=1
+2026-02-03 13:31:10,701 - INFO - crawl_css.py - Found 50 jobs.
+2026-02-03 13:31:10,839 - ERROR - crawl_css.py - Phase 1 Critical Error: unhashable type: 'dict'
+2026-02-03 13:33:50,619 - INFO - crawl_css.py - --- PHASE 1: CRAWL JOB LINKS STARTED ---
+2026-02-03 13:33:51,012 - INFO - crawl_css.py - Fetching links from: https://www.topcv.vn/tim-viec-lam-ai-engineer-kcr257?type_keyword=1
+2026-02-03 13:33:58,872 - INFO - crawl_css.py - Found 50 jobs.
+2026-02-03 13:33:58,872 - INFO - crawl_css.py - Filtered: 50 total -> 50 NEW jobs.
+2026-02-03 13:33:58,873 - INFO - crawl_css.py - Links saved to D:\Data Science Project\job_finder\src\data\raw_links\2026-02-03.jsonl
+2026-02-03 13:33:59,006 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 13:33:59,006 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 13:33:59,389 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:33:59,390 - INFO - crawl_css.py - Sleeping 10.4s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:34:23,176 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 13:34:23,184 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:34:23,184 - INFO - crawl_css.py - Sleeping 14.3s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:34:46,964 - INFO - crawl_css.py - Extracted: Kỹ Sư AI( Thu Nhâp 1,000 - 2,000 USA ) - Phỏng Vấn Ngay -Hà Nội @ CÔNG TY CỔ PHẦN DỊCH VỤ TÀI SẢN VIỆT NAM
+2026-02-03 13:34:46,973 - INFO - crawl_css.py - Processing 3/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:34:46,973 - INFO - crawl_css.py - Sleeping 14.4s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:35:10,585 - INFO - crawl_css.py - Extracted: Giảng ViênIT(AI Software Dev &Data Science) @ Phân hiệu Trường Đại học FPT tại thành phố Hồ Chí Minh
+2026-02-03 13:35:10,594 - INFO - crawl_css.py - Processing 4/50: https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:35:10,594 - INFO - crawl_css.py - Sleeping 11.2s before accessing https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:35:31,180 - INFO - crawl_css.py - Extracted: Kỹ SưCao Cấp Trí Tuệ Nhân Tạo (AI Engineer) @ CÔNG TY CỔ PHẦN THƯƠNG MẠI XUẤT NHẬP KHẨU VHS
+2026-02-03 13:35:31,188 - INFO - crawl_css.py - Processing 5/50: https://www.topcv.vn/viec-lam/thuc-tap-sinh-ai-ojt-ai-engineer/1567647.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:35:31,188 - INFO - crawl_css.py - Sleeping 11.7s before accessing https://www.topcv.vn/viec-lam/thuc-tap-sinh-ai-ojt-ai-engineer/1567647.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:35:52,249 - INFO - crawl_css.py - Extracted: Thực Tập SinhAI (OJTAI Engineer) @ Toshiba Software Development (Vietnam) Co., Ltd.
+2026-02-03 13:35:52,259 - INFO - crawl_css.py - Processing 6/50: https://www.topcv.vn/viec-lam/llm-ai-agentic-engineer/2025025.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:35:52,259 - INFO - crawl_css.py - Sleeping 12.4s before accessing https://www.topcv.vn/viec-lam/llm-ai-agentic-engineer/2025025.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:36:14,004 - INFO - crawl_css.py - Extracted: LLM/AI AgenticEngineer @ Công ty TNHH SETA international Việt Nam
+2026-02-03 13:36:14,012 - INFO - crawl_css.py - Processing 7/50: https://www.topcv.vn/viec-lam/ai-engineer-llm-luong-net-upto-35-trieu-ho-tro-an-trua-tai-ha-noi/2022145.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:36:14,012 - INFO - crawl_css.py - Sleeping 12.7s before accessing https://www.topcv.vn/viec-lam/ai-engineer-llm-luong-net-upto-35-trieu-ho-tro-an-trua-tai-ha-noi/2022145.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:36:36,176 - INFO - crawl_css.py - Extracted: AI Engineer(LLM) - LươngNetUpto 35 Triệu (Hỗ Trợ Ăn Trưa) TạiHà Nội @ Open Reach Tech Hanoi
+2026-02-03 13:36:36,187 - INFO - crawl_css.py - Processing 8/50: https://www.topcv.vn/viec-lam/ai-engineer-genai-nlp-focus-tu-2-nam-kinh-nghiem-offer-upto-30m/2020733.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:36:36,187 - INFO - crawl_css.py - Sleeping 13.3s before accessing https://www.topcv.vn/viec-lam/ai-engineer-genai-nlp-focus-tu-2-nam-kinh-nghiem-offer-upto-30m/2020733.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:36:58,903 - INFO - crawl_css.py - Extracted: AI Engineer(Genai & NLP Focus) - Từ 2 Năm Kinh Nghiệm - Offer Upto 30M @ Công ty cổ phần PT HUB
+2026-02-03 13:36:58,913 - INFO - crawl_css.py - Processing 9/50: https://www.topcv.vn/viec-lam/tts-ai-auto-tro-thanh-bac-thay-tu-dong-hoa-dn/2026491.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:36:58,913 - INFO - crawl_css.py - Sleeping 13.4s before accessing https://www.topcv.vn/viec-lam/tts-ai-auto-tro-thanh-bac-thay-tu-dong-hoa-dn/2026491.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:37:21,739 - INFO - crawl_css.py - Extracted: TTS AI Auto - Trở Thành Bậc Thầy TựĐộng HóaDN @ CÔNG TY TNHH BAHA HOMES
+2026-02-03 13:37:21,747 - INFO - crawl_css.py - Processing 10/50: https://www.topcv.vn/viec-lam/ai-engineer-thu-viec-120-luong/1162872.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:37:21,747 - INFO - crawl_css.py - Sleeping 10.6s before accessing https://www.topcv.vn/viec-lam/ai-engineer-thu-viec-120-luong/1162872.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:37:41,934 - INFO - crawl_css.py - Extracted: AI Engineer- Thử Việc 120% Lương @ CÔNG TY TNHH VERISERVE VIỆT NAM
+2026-02-03 13:37:41,944 - INFO - crawl_css.py - Processing 11/50: https://www.topcv.vn/viec-lam/ai-engineer-ai-automation-specialist-senior/1995985.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:37:41,944 - INFO - crawl_css.py - Sleeping 10.6s before accessing https://www.topcv.vn/viec-lam/ai-engineer-ai-automation-specialist-senior/1995985.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:38:02,001 - INFO - crawl_css.py - Extracted: AI Engineer(AI & Automation Specialist / Senior) @ Công ty Cổ phần SEONGON Thịnh Vượng
+2026-02-03 13:38:02,011 - INFO - crawl_css.py - Processing 12/50: https://www.topcv.vn/viec-lam/thuc-tap-sinh-tai-nang-tri-tue-nhan-tao-ai-intern-upto-1000/2028324.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:38:02,011 - INFO - crawl_css.py - Sleeping 13.9s before accessing https://www.topcv.vn/viec-lam/thuc-tap-sinh-tai-nang-tri-tue-nhan-tao-ai-intern-upto-1000/2028324.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:38:25,613 - INFO - crawl_css.py - Extracted: Thực Tập SinhTài Năng Trí Tuệ Nhân Tạo (AI Intern) Upto 1000$ @ CÔNG TY CỔ PHẦN THƯƠNG MẠI XUẤT NHẬP KHẨU VHS
+2026-02-03 13:38:25,621 - INFO - crawl_css.py - Processing 13/50: https://www.topcv.vn/viec-lam/ai-engineer/2028047.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:38:25,621 - INFO - crawl_css.py - Sleeping 13.1s before accessing https://www.topcv.vn/viec-lam/ai-engineer/2028047.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:38:47,759 - INFO - crawl_css.py - Extracted: AI Engineer @ Công ty TNHH Công Nghệ và Thương Mại Lifesup
+2026-02-03 13:38:47,767 - INFO - crawl_css.py - Processing 14/50: https://www.topcv.vn/viec-lam/ai-engineer/2028270.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:38:47,767 - INFO - crawl_css.py - Sleeping 10.8s before accessing https://www.topcv.vn/viec-lam/ai-engineer/2028270.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:39:07,850 - INFO - crawl_css.py - Extracted: AI Engineer @ Công ty CP Giải pháp Thanh toán Việt Nam (VNPAY)
+2026-02-03 13:39:07,859 - INFO - crawl_css.py - Processing 15/50: https://www.topcv.vn/viec-lam/ai-engineer/2026572.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:39:07,859 - INFO - crawl_css.py - Sleeping 12.1s before accessing https://www.topcv.vn/viec-lam/ai-engineer/2026572.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:39:29,408 - INFO - crawl_css.py - Extracted: AI Engineer @ Công ty Cổ phần Kaopiz Software
+2026-02-03 13:39:29,417 - INFO - crawl_css.py - Processing 16/50: https://www.topcv.vn/viec-lam/nhan-vien-thiet-ke-hinh-anh-design-uu-tien-ung-vien-biet-su-dung-phan-mem-ung-dung-ai/2013720.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:39:29,417 - INFO - crawl_css.py - Sleeping 14.5s before accessing https://www.topcv.vn/viec-lam/nhan-vien-thiet-ke-hinh-anh-design-uu-tien-ung-vien-biet-su-dung-phan-mem-ung-dung-ai/2013720.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:39:53,259 - INFO - crawl_css.py - Extracted: Nhân Viên Thiết KếHình Ảnh /Design- Ưu Tiên Ứng Viên Biết Sử Dụng Phần Mềm Ứng Dụng AI @ HỘ KINH DOANH TIẾN TRẦN
+2026-02-03 13:39:53,268 - INFO - crawl_css.py - Processing 17/50: https://www.topcv.vn/viec-lam/middle-ai-developer/1969752.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:39:53,268 - INFO - crawl_css.py - Sleeping 14.8s before accessing https://www.topcv.vn/viec-lam/middle-ai-developer/1969752.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:40:17,436 - INFO - crawl_css.py - Extracted: Middle AIDeveloper @ CÔNG TY TNHH CÔNG NGHỆ RIKAI
+2026-02-03 13:40:17,446 - INFO - crawl_css.py - Processing 18/50: https://www.topcv.vn/viec-lam/senior-ai-natural-language-processing-engineer/2024884.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:40:17,446 - INFO - crawl_css.py - Sleeping 10.3s before accessing https://www.topcv.vn/viec-lam/senior-ai-natural-language-processing-engineer/2024884.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:40:37,216 - INFO - crawl_css.py - Extracted: Senior AI -Natural Language Processing Engineer @ CÔNG TY CỔ PHẦN CÔNG NGHỆ PREP
+2026-02-03 13:40:37,223 - INFO - crawl_css.py - Processing 19/50: https://www.topcv.vn/viec-lam/nlp-engineer-pre-senior-senior/2024729.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:40:37,223 - INFO - crawl_css.py - Sleeping 13.7s before accessing https://www.topcv.vn/viec-lam/nlp-engineer-pre-senior-senior/2024729.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:41:00,532 - INFO - crawl_css.py - Extracted: NLP Engineer(Pre-Senior/ Senior) @ CÔNG TY CỔ PHẦN CÔNG NGHỆ PREP
+2026-02-03 13:41:00,541 - INFO - crawl_css.py - Processing 20/50: https://www.topcv.vn/viec-lam/ai-engineer/1491115.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:41:00,541 - INFO - crawl_css.py - Sleeping 11.3s before accessing https://www.topcv.vn/viec-lam/ai-engineer/1491115.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:41:21,231 - INFO - crawl_css.py - Extracted: AI Engineer @ TECHVIFY SOFTWARE., JSC
+2026-02-03 13:41:21,238 - INFO - crawl_css.py - Processing 21/50: https://www.topcv.vn/viec-lam/nlp-engineer-pre-senior-senior/2023113.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:41:21,238 - INFO - crawl_css.py - Sleeping 13.8s before accessing https://www.topcv.vn/viec-lam/nlp-engineer-pre-senior-senior/2023113.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:41:44,554 - INFO - crawl_css.py - Extracted: NLP EngineerPre-Senior/ Senior @ Công ty Cổ phần Công nghệ Prep
+2026-02-03 13:41:44,563 - INFO - crawl_css.py - Processing 22/50: https://www.topcv.vn/viec-lam/senior-ai-engineer-nlp-engineer/2023176.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:41:44,563 - INFO - crawl_css.py - Sleeping 14.2s before accessing https://www.topcv.vn/viec-lam/senior-ai-engineer-nlp-engineer/2023176.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:47:28,318 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 13:47:28,318 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 13:47:28,702 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:47:28,702 - INFO - crawl_css.py - Sleeping 14.7s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:47:44,370 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 13:47:44,372 - ERROR - database.py - DB Error: no such table: raw_jobs
+2026-02-03 13:47:44,372 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:47:44,372 - INFO - crawl_css.py - Sleeping 13.9s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:47:58,855 - INFO - crawl_css.py - Extracted: Kỹ Sư AI( Thu Nhâp 1,000 - 2,000 USA ) - Phỏng Vấn Ngay -Hà Nội @ CÔNG TY CỔ PHẦN DỊCH VỤ TÀI SẢN VIỆT NAM
+2026-02-03 13:47:58,857 - ERROR - database.py - DB Error: no such table: raw_jobs
+2026-02-03 13:47:58,857 - INFO - crawl_css.py - Processing 3/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:47:58,857 - INFO - crawl_css.py - Sleeping 10.3s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:53:49,190 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 13:53:49,190 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 13:53:49,602 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:53:49,602 - INFO - crawl_css.py - Sleeping 13.4s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:54:03,076 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 13:54:03,078 - ERROR - database.py - DB Error: no such table: raw_jobs
+2026-02-03 13:54:03,078 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:54:03,078 - INFO - crawl_css.py - Sleeping 12.1s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:54:15,221 - INFO - crawl_css.py - Extracted: Kỹ Sư AI( Thu Nhâp 1,000 - 2,000 USA ) - Phỏng Vấn Ngay -Hà Nội @ CÔNG TY CỔ PHẦN DỊCH VỤ TÀI SẢN VIỆT NAM
+2026-02-03 13:54:15,223 - ERROR - database.py - DB Error: no such table: raw_jobs
+2026-02-03 13:54:15,223 - INFO - crawl_css.py - Processing 3/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:54:15,223 - INFO - crawl_css.py - Sleeping 14.1s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:54:57,404 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 13:54:57,405 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 13:54:57,810 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:54:57,810 - INFO - crawl_css.py - Sleeping 12.9s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:55:10,756 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 13:55:10,766 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:55:10,766 - INFO - crawl_css.py - Sleeping 10.6s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:55:21,430 - INFO - crawl_css.py - Extracted: Kỹ Sư AI( Thu Nhâp 1,000 - 2,000 USA ) - Phỏng Vấn Ngay -Hà Nội @ CÔNG TY CỔ PHẦN DỊCH VỤ TÀI SẢN VIỆT NAM
+2026-02-03 13:55:21,439 - INFO - crawl_css.py - Processing 3/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:55:21,439 - INFO - crawl_css.py - Sleeping 12.9s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:55:35,038 - INFO - crawl_css.py - Extracted: Giảng ViênIT(AI Software Dev &Data Science) @ Phân hiệu Trường Đại học FPT tại thành phố Hồ Chí Minh
+2026-02-03 13:55:35,048 - INFO - crawl_css.py - Processing 4/50: https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:55:35,048 - INFO - crawl_css.py - Sleeping 14.6s before accessing https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 13:55:50,232 - INFO - crawl_css.py - Extracted: Kỹ SưCao Cấp Trí Tuệ Nhân Tạo (AI Engineer) @ CÔNG TY CỔ PHẦN THƯƠNG MẠI XUẤT NHẬP KHẨU VHS
+2026-02-03 13:55:50,241 - INFO - crawl_css.py - Processing 5/50: https://www.topcv.vn/viec-lam/thuc-tap-sinh-ai-ojt-ai-engineer/1567647.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 13:55:50,241 - INFO - crawl_css.py - Sleeping 12.5s before accessing https://www.topcv.vn/viec-lam/thuc-tap-sinh-ai-ojt-ai-engineer/1567647.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:00:57,172 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 14:00:57,172 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 14:00:57,608 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:00:57,609 - INFO - crawl_css.py - Sleeping 11.6s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:01:09,310 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 14:01:09,318 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:01:09,318 - INFO - crawl_css.py - Sleeping 11.7s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:01:21,057 - INFO - crawl_css.py - Extracted: Kỹ Sư AI( Thu Nhâp 1,000 - 2,000 USA ) - Phỏng Vấn Ngay -Hà Nội @ CÔNG TY CỔ PHẦN DỊCH VỤ TÀI SẢN VIỆT NAM
+2026-02-03 14:01:21,066 - INFO - crawl_css.py - Processing 3/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:01:21,066 - INFO - crawl_css.py - Sleeping 11.7s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:01:32,816 - INFO - crawl_css.py - Extracted: Giảng ViênIT(AI Software Dev &Data Science) @ Phân hiệu Trường Đại học FPT tại thành phố Hồ Chí Minh
+2026-02-03 14:01:32,826 - INFO - crawl_css.py - Processing 4/50: https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:01:32,826 - INFO - crawl_css.py - Sleeping 13.7s before accessing https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:01:46,605 - INFO - crawl_css.py - Extracted: Kỹ SưCao Cấp Trí Tuệ Nhân Tạo (AI Engineer) @ CÔNG TY CỔ PHẦN THƯƠNG MẠI XUẤT NHẬP KHẨU VHS
+2026-02-03 14:01:46,612 - INFO - crawl_css.py - Processing 5/50: https://www.topcv.vn/viec-lam/thuc-tap-sinh-ai-ojt-ai-engineer/1567647.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:01:46,612 - INFO - crawl_css.py - Sleeping 14.2s before accessing https://www.topcv.vn/viec-lam/thuc-tap-sinh-ai-ojt-ai-engineer/1567647.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:02:01,515 - INFO - crawl_css.py - Extracted: Thực Tập SinhAI (OJTAI Engineer) @ Toshiba Software Development (Vietnam) Co., Ltd.
+2026-02-03 14:02:01,524 - INFO - crawl_css.py - Processing 6/50: https://www.topcv.vn/viec-lam/llm-ai-agentic-engineer/2025025.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:02:01,524 - INFO - crawl_css.py - Sleeping 13.9s before accessing https://www.topcv.vn/viec-lam/llm-ai-agentic-engineer/2025025.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:06:00,616 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 14:06:00,617 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 14:06:01,052 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:06:01,052 - INFO - crawl_css.py - Sleeping 13.8s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:06:14,877 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 14:06:14,879 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:06:14,879 - INFO - crawl_css.py - Sleeping 11.4s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:06:26,388 - INFO - crawl_css.py - Extracted: Kỹ Sư AI( Thu Nhâp 1,000 - 2,000 USA ) - Phỏng Vấn Ngay -Hà Nội @ CÔNG TY CỔ PHẦN DỊCH VỤ TÀI SẢN VIỆT NAM
+2026-02-03 14:06:26,390 - INFO - crawl_css.py - Processing 3/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:06:26,390 - INFO - crawl_css.py - Sleeping 14.6s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:06:41,044 - INFO - crawl_css.py - Extracted: Giảng ViênIT(AI Software Dev &Data Science) @ Phân hiệu Trường Đại học FPT tại thành phố Hồ Chí Minh
+2026-02-03 14:06:41,046 - INFO - crawl_css.py - Processing 4/50: https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:06:41,046 - INFO - crawl_css.py - Sleeping 10.4s before accessing https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:06:51,570 - INFO - crawl_css.py - Extracted: Kỹ SưCao Cấp Trí Tuệ Nhân Tạo (AI Engineer) @ CÔNG TY CỔ PHẦN THƯƠNG MẠI XUẤT NHẬP KHẨU VHS
+2026-02-03 14:06:51,572 - INFO - crawl_css.py - Processing 5/50: https://www.topcv.vn/viec-lam/thuc-tap-sinh-ai-ojt-ai-engineer/1567647.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:06:51,572 - INFO - crawl_css.py - Sleeping 12.7s before accessing https://www.topcv.vn/viec-lam/thuc-tap-sinh-ai-ojt-ai-engineer/1567647.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:07:04,337 - INFO - crawl_css.py - Extracted: Thực Tập SinhAI (OJTAI Engineer) @ Toshiba Software Development (Vietnam) Co., Ltd.
+2026-02-03 14:07:04,339 - INFO - crawl_css.py - Processing 6/50: https://www.topcv.vn/viec-lam/llm-ai-agentic-engineer/2025025.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:07:04,339 - INFO - crawl_css.py - Sleeping 12.1s before accessing https://www.topcv.vn/viec-lam/llm-ai-agentic-engineer/2025025.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:07:17,081 - INFO - crawl_css.py - Extracted: LLM/AI AgenticEngineer @ Công ty TNHH SETA international Việt Nam
+2026-02-03 14:07:17,089 - INFO - crawl_css.py - Processing 7/50: https://www.topcv.vn/viec-lam/ai-engineer-llm-luong-net-upto-35-trieu-ho-tro-an-trua-tai-ha-noi/2022145.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:07:17,089 - INFO - crawl_css.py - Sleeping 11.7s before accessing https://www.topcv.vn/viec-lam/ai-engineer-llm-luong-net-upto-35-trieu-ho-tro-an-trua-tai-ha-noi/2022145.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:12:58,446 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 14:12:58,447 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 14:12:58,833 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:12:58,833 - INFO - crawl_css.py - Sleeping 14.4s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:13:13,275 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 14:13:13,277 - ERROR - database.py - DB Error: no such table: raw_jobs
+2026-02-03 14:13:13,277 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:13:13,277 - INFO - crawl_css.py - Sleeping 11.7s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:16:52,115 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 14:16:52,116 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 14:16:52,491 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:16:52,492 - INFO - crawl_css.py - Sleeping 11.1s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:17:03,721 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_141703.html
+2026-02-03 14:17:03,721 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 14:17:03,722 - ERROR - database.py - DB Error: no such table: raw_jobs
+2026-02-03 14:17:03,723 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:17:03,723 - INFO - crawl_css.py - Sleeping 13.3s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:17:17,151 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_141717.html
+2026-02-03 14:17:17,152 - INFO - crawl_css.py - Extracted: Kỹ Sư AI( Thu Nhâp 1,000 - 2,000 USA ) - Phỏng Vấn Ngay -Hà Nội @ CÔNG TY CỔ PHẦN DỊCH VỤ TÀI SẢN VIỆT NAM
+2026-02-03 14:17:17,153 - ERROR - database.py - DB Error: no such table: raw_jobs
+2026-02-03 14:17:17,153 - INFO - crawl_css.py - Processing 3/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:17:17,153 - INFO - crawl_css.py - Sleeping 14.6s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:25:02,076 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 14:25:02,076 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 14:25:02,508 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:25:02,508 - INFO - crawl_css.py - Sleeping 14.2s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:25:14,235 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 14:25:14,235 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 14:25:14,610 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:25:14,610 - INFO - crawl_css.py - Sleeping 14.7s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:25:29,439 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_142529.html
+2026-02-03 14:25:29,439 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 14:25:29,447 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:25:29,447 - INFO - crawl_css.py - Sleeping 13.8s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:25:43,314 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_142543.html
+2026-02-03 14:25:43,315 - INFO - crawl_css.py - Extracted: Kỹ Sư AI( Thu Nhâp 1,000 - 2,000 USA ) - Phỏng Vấn Ngay -Hà Nội @ CÔNG TY CỔ PHẦN DỊCH VỤ TÀI SẢN VIỆT NAM
+2026-02-03 14:25:43,324 - INFO - crawl_css.py - Processing 3/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:25:43,324 - INFO - crawl_css.py - Sleeping 13.0s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:25:56,363 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_142556.html
+2026-02-03 14:25:56,364 - INFO - crawl_css.py - Extracted: Giảng ViênIT(AI Software Dev &Data Science) @ Phân hiệu Trường Đại học FPT tại thành phố Hồ Chí Minh
+2026-02-03 14:25:56,372 - INFO - crawl_css.py - Processing 4/50: https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:25:56,372 - INFO - crawl_css.py - Sleeping 11.9s before accessing https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:33:28,238 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 14:33:28,238 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 14:33:28,665 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:33:28,665 - INFO - crawl_css.py - Sleeping 13.0s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:33:41,760 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_143341.html
+2026-02-03 14:33:41,760 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 14:33:41,762 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:33:41,762 - INFO - crawl_css.py - Sleeping 14.9s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:33:56,754 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_143356.html
+2026-02-03 14:33:56,754 - INFO - crawl_css.py - Extracted: Kỹ Sư AI( Thu Nhâp 1,000 - 2,000 USA ) - Phỏng Vấn Ngay -Hà Nội @ CÔNG TY CỔ PHẦN DỊCH VỤ TÀI SẢN VIỆT NAM
+2026-02-03 14:33:56,756 - INFO - crawl_css.py - Processing 3/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:33:56,756 - INFO - crawl_css.py - Sleeping 10.9s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:34:50,714 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 14:34:50,714 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 14:34:51,103 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:34:51,103 - INFO - crawl_css.py - Sleeping 12.7s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:35:03,890 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_143503.html
+2026-02-03 14:35:03,891 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 14:35:03,892 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:35:03,892 - INFO - crawl_css.py - Sleeping 13.8s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:35:17,769 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_143517.html
+2026-02-03 14:35:17,769 - INFO - crawl_css.py - Extracted: Kỹ Sư AI( Thu Nhâp 1,000 - 2,000 USA ) - Phỏng Vấn Ngay -Hà Nội @ CÔNG TY CỔ PHẦN DỊCH VỤ TÀI SẢN VIỆT NAM
+2026-02-03 14:35:17,771 - INFO - crawl_css.py - Processing 3/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:35:17,771 - INFO - crawl_css.py - Sleeping 13.4s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:45:03,995 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 14:45:03,995 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 14:45:04,374 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:45:04,374 - INFO - crawl_css.py - Sleeping 13.0s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:45:30,757 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_144530.html
+2026-02-03 14:45:30,757 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 14:45:30,758 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:45:30,758 - INFO - crawl_css.py - Sleeping 11.2s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:47:33,716 - INFO - crawl_css.py - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-02-03 14:47:33,775 - INFO - crawl_css.py - Loaded 50 links to process.
+2026-02-03 14:47:34,848 - INFO - crawl_css.py - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:47:34,848 - INFO - crawl_css.py - Sleeping 12.5s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:48:01,299 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_144801.html
+2026-02-03 14:48:01,299 - INFO - crawl_css.py - Extracted: AI EngineerIntern (Computer Vision) @ Công ty cổ phần công nghệ - viễn thông Elcom
+2026-02-03 14:48:01,299 - INFO - crawl_css.py - Processing 2/50: https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:48:01,299 - INFO - crawl_css.py - Sleeping 10.6s before accessing https://www.topcv.vn/viec-lam/ky-su-ai-thu-nhap-1-000-2-000-usa-phong-van-ngay-ha-noi/2028349.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:48:21,615 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_144821.html
+2026-02-03 14:48:21,616 - INFO - crawl_css.py - Extracted: Kỹ Sư AI/AI Engineer( Thu Nhâp 1,000 - 2,000 USD ) - Phỏng Vấn Ngay -Hà Nội @ CÔNG TY CỔ PHẦN DỊCH VỤ TÀI SẢN VIỆT NAM
+2026-02-03 14:48:21,618 - INFO - crawl_css.py - Processing 3/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:48:21,618 - INFO - crawl_css.py - Sleeping 13.9s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...
+2026-02-03 14:48:44,715 - INFO - crawl_css.py - 📸 Saved debug HTML to debug_job_144844.html
+2026-02-03 14:48:44,715 - INFO - crawl_css.py - Extracted: Giảng ViênIT(AI Software Dev &Data Science) @ Phân hiệu Trường Đại học FPT tại thành phố Hồ Chí Minh
+2026-02-03 14:48:44,716 - INFO - crawl_css.py - Processing 4/50: https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434
+2026-02-03 14:48:44,716 - INFO - crawl_css.py - Sleeping 12.1s before accessing https://www.topcv.vn/viec-lam/ky-su-cao-cap-tri-tue-nhan-tao-ai-engineer/2028235.html?ta_source=JobSearchList_LinkDetail&u_sr_id=GOgC44KVbxytAXWLPW690tMt4wFbmTKG8o249uDf_1770100434...

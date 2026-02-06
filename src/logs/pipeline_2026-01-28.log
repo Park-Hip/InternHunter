@@ -1,0 +1,38 @@
+2026-01-28 12:56:08,185 - __main__ - INFO - Wrote 5 jobs to ./data/raw/2026-01-28.jsonl
+2026-01-28 13:18:54,029 - __main__ - INFO - Found ./data/raw\2026-01-28.jsonl
+2026-01-28 13:19:11,595 - __main__ - INFO - Found ./data/raw\2026-01-28.jsonl
+2026-01-28 13:31:33,451 - __main__ - INFO - --- MATCHING PROCESS STARTED ---
+2026-01-28 13:31:33,452 - __main__ - INFO - Found ./data/raw\2026-01-28.jsonl
+2026-01-28 13:32:57,454 - __main__ - INFO - --- MATCHING PROCESS STARTED ---
+2026-01-28 13:32:57,454 - __main__ - INFO - Found ./data/raw\2026-01-28.jsonl
+2026-01-28 13:34:11,084 - __main__ - INFO - --- MATCHING PROCESS STARTED ---
+2026-01-28 13:34:11,084 - __main__ - INFO - Found ./data/raw\2026-01-28.jsonl
+2026-01-28 13:35:12,369 - __main__ - INFO - --- MATCHING PROCESS STARTED ---
+2026-01-28 13:35:12,369 - __main__ - INFO - Found ./data/raw\2026-01-28.jsonl
+2026-01-28 13:35:12,373 - __main__ - INFO - Found 2 matches with similarity score > 0.1
+2026-01-28 13:35:34,326 - __main__ - INFO - --- MATCHING PROCESS STARTED ---
+2026-01-28 13:35:34,326 - __main__ - INFO - Found ./data/raw\2026-01-28.jsonl
+2026-01-28 13:35:34,330 - __main__ - INFO - Found 2 matches with similarity score > 0.1
+2026-01-28 13:35:34,331 - __main__ - INFO - --- MATCHING PROCESS FINISHED ---
+2026-01-28 13:43:30,683 - __main__ - INFO - --- MATCHING PROCESS STARTED ---
+2026-01-28 13:43:30,683 - __main__ - INFO - Found ./data/raw\2026-01-28.jsonl
+2026-01-28 13:43:30,687 - __main__ - INFO - Found 2 matches with similarity score > 0.1
+2026-01-28 13:45:42,591 - __main__ - INFO - --- MATCHING PROCESS STARTED ---
+2026-01-28 13:45:42,591 - __main__ - INFO - Found ./data/raw\2026-01-28.jsonl
+2026-01-28 13:45:42,594 - __main__ - INFO - Found 2 matches with similarity score > 0.1
+2026-01-28 13:46:57,077 - __main__ - INFO - --- MATCHING PROCESS STARTED ---
+2026-01-28 13:46:57,077 - __main__ - INFO - Found ./data/raw\2026-01-28.jsonl
+2026-01-28 13:46:57,080 - __main__ - INFO - Found 2 matches with similarity score > 0.1
+2026-01-28 13:46:57,082 - __main__ - INFO - --- MATCHING PROCESS FINISHED ---
+2026-01-28 15:48:42,128 - __main__ - INFO - --- ALERT PROCESS STARTED ---
+2026-01-28 15:48:42,129 - __main__ - ERROR - Email credentials missing in .env file!
+2026-01-28 15:48:42,129 - __main__ - INFO - --- ALERT PROCESS FINISHED ---
+2026-01-28 15:49:51,638 - __main__ - INFO - --- ALERT PROCESS STARTED ---
+2026-01-28 15:49:51,638 - __main__ - ERROR - Email credentials missing in .env file!
+2026-01-28 15:49:51,638 - __main__ - INFO - --- ALERT PROCESS FINISHED ---
+2026-01-28 15:50:16,954 - __main__ - INFO - --- ALERT PROCESS STARTED ---
+2026-01-28 15:50:16,954 - __main__ - ERROR - Email credentials missing in .env file!
+2026-01-28 15:50:16,954 - __main__ - INFO - --- ALERT PROCESS FINISHED ---
+2026-01-28 15:53:17,983 - __main__ - INFO - --- ALERT PROCESS STARTED ---
+2026-01-28 15:53:17,984 - __main__ - INFO - Connecting to Gmail SMTP...
+2026-01-28 15:53:21,360 - __main__ - INFO - --- ALERT PROCESS FINISHED ---

@@ -1,0 +1,8 @@
+pandas
+scikit-learn
+python-dotenv
+crawl4ai
+playwright
+mlflow
+unidecode
+google-genai

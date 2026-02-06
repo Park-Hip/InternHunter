@@ -1,0 +1,173 @@
+2026-01-30 09:12:45,632 - root - INFO - --- CRAWL JOB LINKS STARTED ---
+2026-01-30 09:12:49,585 - __main__ - INFO - Found 50 jobs.
+2026-01-30 09:12:49,585 - __main__ - INFO - Successfully wrote 50 jobs to ./data/raw_links/2026-01-30.jsonl
+2026-01-30 10:22:30,277 - root - INFO - --- CRAWL JOB LINKS STARTED ---
+2026-01-30 10:22:34,189 - __main__ - INFO - Found 50 jobs.
+2026-01-30 10:22:34,190 - __main__ - INFO - Successfully wrote 50 jobs to ./data/raw_links/2026-01-30.jsonl
+2026-01-30 10:22:34,332 - __main__ - INFO - --- EXTRACT JOB DETAILS STARTED ---
+2026-01-30 10:22:34,333 - __main__ - INFO - loaded 10 links to process.
+2026-01-30 10:22:34,745 - __main__ - INFO - Processing 1/10: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=u07y2HMcLtrMzGq9Cty2oZ2BNeMThU8xwZX8sMeN_1769743348
+2026-01-30 10:22:34,747 - __main__ - INFO - Sleeping 5.9s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=u07y2HMcLtrMzGq9Cty2oZ2BNeMThU8xwZX8sMeN_1769743348...
+2026-01-30 10:22:48,741 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:22:54,820 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:22:58,977 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:22:59,151 - __main__ - INFO - Extracted: Unknown @ Unknown
+2026-01-30 10:22:59,152 - __main__ - INFO - Processing 2/10: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=u07y2HMcLtrMzGq9Cty2oZ2BNeMThU8xwZX8sMeN_1769743348
+2026-01-30 10:22:59,152 - __main__ - INFO - Sleeping 3.8s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=u07y2HMcLtrMzGq9Cty2oZ2BNeMThU8xwZX8sMeN_1769743348...
+2026-01-30 10:23:10,531 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:37:13,012 - root - INFO - --- CRAWL JOB LINKS STARTED ---
+2026-01-30 10:37:16,489 - __main__ - INFO - Found 50 jobs.
+2026-01-30 10:37:16,490 - __main__ - INFO - Successfully wrote 50 jobs to ./data/raw_links/2026-01-30.jsonl
+2026-01-30 10:37:16,626 - __main__ - INFO - --- EXTRACT JOB DETAILS STARTED ---
+2026-01-30 10:37:16,626 - __main__ - INFO - loaded 10 links to process.
+2026-01-30 10:37:17,030 - __main__ - INFO - Processing 1/10: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=t8Ji2Leq6TV3yS4njXGojohYCjXWJg0acVB7DWY3_1769744230
+2026-01-30 10:37:23,968 - __main__ - ERROR - An error occurred: Browser.close: Connection closed while reading from the driver
+2026-01-30 10:40:37,860 - root - INFO - --- CRAWL JOB LINKS STARTED ---
+2026-01-30 10:40:41,168 - __main__ - INFO - Found 50 jobs.
+2026-01-30 10:40:41,168 - __main__ - INFO - Successfully wrote 50 jobs to ./data/raw_links/2026-01-30.jsonl
+2026-01-30 10:40:41,305 - __main__ - INFO - --- EXTRACT JOB DETAILS STARTED ---
+2026-01-30 10:40:41,306 - __main__ - INFO - Loaded 10 links to process.
+2026-01-30 10:41:12,359 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:43:19,977 - __main__ - INFO - --- EXTRACT JOB DETAILS STARTED ---
+2026-01-30 10:43:19,978 - __main__ - INFO - Loaded 5 links to process.
+2026-01-30 10:43:20,021 - __main__ - INFO - [BATCH] Starting Batch 1 (Jobs 1-5)
+2026-01-30 10:43:20,392 - __main__ - INFO - [WAIT] Sleeping 36.2s for Gemini Free Tier...
+2026-01-30 10:44:07,561 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:44:10,188 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:44:14,541 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:44:14,888 - __main__ - INFO - [SUCCESS] Extracted: Unknown @ Unknown
+2026-01-30 10:44:14,888 - __main__ - INFO - [WAIT] Sleeping 41.1s for Gemini Free Tier...
+2026-01-30 10:50:48,509 - __main__ - INFO - --- EXTRACT JOB DETAILS STARTED ---
+2026-01-30 10:50:48,510 - __main__ - INFO - Loaded 5 links to process.
+2026-01-30 10:50:48,553 - __main__ - INFO - [BATCH] Starting Batch 1 (Jobs 1-5)
+2026-01-30 10:50:48,926 - __main__ - INFO - [WAIT] Sleeping 36.8s for Gemini Free Tier...
+2026-01-30 10:51:26,976 - __main__ - INFO - [SUCCESS] Extracted: Unknown @ Unknown
+2026-01-30 10:51:26,977 - __main__ - INFO - [WAIT] Sleeping 39.2s for Gemini Free Tier...
+2026-01-30 10:52:16,941 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:52:19,822 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:52:24,184 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:52:24,568 - __main__ - INFO - [SUCCESS] Extracted: Unknown @ Unknown
+2026-01-30 10:52:24,569 - __main__ - INFO - [WAIT] Sleeping 41.4s for Gemini Free Tier...
+2026-01-30 10:53:16,129 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:53:18,755 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:53:23,388 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-01-30 10:53:24,112 - __main__ - INFO - [SUCCESS] Extracted: Unknown @ Unknown
+2026-01-30 10:53:24,113 - __main__ - INFO - [WAIT] Sleeping 37.9s for Gemini Free Tier...
+2026-01-30 14:17:42,693 - __main__ - INFO - MLflow prompt loaded successfully.
+2026-01-30 14:17:42,694 - __main__ - INFO - --- PHASE 1: CRAWL JOB LINKS STARTED ---
+2026-01-30 14:17:51,060 - __main__ - INFO - Found 50 jobs.
+2026-01-30 14:17:51,061 - __main__ - INFO - Links saved to ./data/raw_links/2026-01-30.jsonl
+2026-01-30 14:17:51,196 - __main__ - INFO - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-01-30 14:17:51,197 - __main__ - INFO - loaded 50 links to process.
+2026-01-30 14:17:51,631 - __main__ - INFO - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=8437SGKlaEczPUimuFYJ672YmrtVj6opq6C0ICCD_1769757463
+2026-01-30 14:17:51,631 - __main__ - INFO -  Sleeping 3.1s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=8437SGKlaEczPUimuFYJ672YmrtVj6opq6C0ICCD_1769757463...
+2026-01-30 14:18:03,922 - LiteLLM - INFO - 
+LiteLLM completion() model= llama3-8b-8192; provider = groq
+2026-01-30 14:18:04,747 - __main__ - INFO - Processing 2/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=8437SGKlaEczPUimuFYJ672YmrtVj6opq6C0ICCD_1769757463
+2026-01-30 14:18:04,747 - __main__ - INFO -  Sleeping 4.6s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=8437SGKlaEczPUimuFYJ672YmrtVj6opq6C0ICCD_1769757463...
+2026-01-30 14:22:59,799 - __main__ - INFO - MLflow prompt loaded successfully.
+2026-01-30 14:22:59,810 - __main__ - INFO - --- PHASE 1: CRAWL JOB LINKS STARTED ---
+2026-01-30 14:23:08,223 - __main__ - INFO - Found 50 jobs.
+2026-01-30 14:23:08,223 - __main__ - INFO - Links saved to ./data/raw_links/2026-01-30.jsonl
+2026-01-30 14:23:08,378 - __main__ - INFO - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-01-30 14:23:08,379 - __main__ - INFO - loaded 50 links to process.
+2026-01-30 14:23:08,797 - __main__ - INFO - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=YhuUybEZcd2A2x9i0rtrNG3TRqzDObLbmzGWM8xl_1769757781
+2026-01-30 14:23:08,797 - __main__ - INFO -  Sleeping 3.9s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=YhuUybEZcd2A2x9i0rtrNG3TRqzDObLbmzGWM8xl_1769757781...
+2026-01-30 14:23:21,283 - LiteLLM - INFO - 
+LiteLLM completion() model= llama3-8b-8192; provider = groq
+2026-01-30 14:23:22,200 - __main__ - INFO - Extracted: Unknown @ Unknown
+2026-01-30 14:23:22,201 - __main__ - INFO - Processing 2/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=YhuUybEZcd2A2x9i0rtrNG3TRqzDObLbmzGWM8xl_1769757781
+2026-01-30 14:23:22,201 - __main__ - INFO -  Sleeping 5.0s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=YhuUybEZcd2A2x9i0rtrNG3TRqzDObLbmzGWM8xl_1769757781...
+2026-01-30 14:23:30,997 - LiteLLM - INFO - 
+LiteLLM completion() model= llama3-8b-8192; provider = groq
+2026-01-30 14:23:31,427 - __main__ - INFO - Extracted: Unknown @ Unknown
+2026-01-30 14:23:31,428 - __main__ - INFO - Processing 3/50: https://www.topcv.vn/viec-lam/tts-ai-auto-tro-thanh-bac-thay-tu-dong-hoa-dn/2026491.html?ta_source=JobSearchList_LinkDetail&u_sr_id=YhuUybEZcd2A2x9i0rtrNG3TRqzDObLbmzGWM8xl_1769757781
+2026-01-30 14:23:31,428 - __main__ - INFO -  Sleeping 5.2s before accessing https://www.topcv.vn/viec-lam/tts-ai-auto-tro-thanh-bac-thay-tu-dong-hoa-dn/2026491.html?ta_source=JobSearchList_LinkDetail&u_sr_id=YhuUybEZcd2A2x9i0rtrNG3TRqzDObLbmzGWM8xl_1769757781...
+2026-01-30 14:26:24,146 - __main__ - INFO - MLflow prompt loaded successfully.
+2026-01-30 14:26:24,156 - __main__ - INFO - --- PHASE 1: CRAWL JOB LINKS STARTED ---
+2026-01-30 14:26:33,380 - __main__ - INFO - Found 50 jobs.
+2026-01-30 14:26:33,380 - __main__ - INFO - Links saved to ./data/raw_links/2026-01-30.jsonl
+2026-01-30 14:26:33,517 - __main__ - INFO - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-01-30 14:26:33,518 - __main__ - INFO - loaded 50 links to process.
+2026-01-30 14:26:33,931 - __main__ - INFO - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CyC98mnmNcxD6BaCubfRMpfYwHdDCxmuGYPwTLMb_1769757986
+2026-01-30 14:26:33,931 - __main__ - INFO - Sleeping 3.3s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CyC98mnmNcxD6BaCubfRMpfYwHdDCxmuGYPwTLMb_1769757986...
+2026-01-30 14:26:46,205 - LiteLLM - INFO - 
+LiteLLM completion() model= llama3-8b-8192; provider = groq
+2026-01-30 14:26:47,075 - __main__ - INFO - Extracted: Unknown @ Unknown
+2026-01-30 14:26:47,075 - __main__ - INFO - Processing 2/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CyC98mnmNcxD6BaCubfRMpfYwHdDCxmuGYPwTLMb_1769757986
+2026-01-30 14:26:47,075 - __main__ - INFO - Sleeping 5.3s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CyC98mnmNcxD6BaCubfRMpfYwHdDCxmuGYPwTLMb_1769757986...
+2026-01-30 14:26:56,173 - LiteLLM - INFO - 
+LiteLLM completion() model= llama3-8b-8192; provider = groq
+2026-01-30 14:26:56,685 - __main__ - INFO - Extracted: Unknown @ Unknown
+2026-01-30 14:26:56,685 - __main__ - INFO - Processing 3/50: https://www.topcv.vn/viec-lam/tts-ai-auto-tro-thanh-bac-thay-tu-dong-hoa-dn/2026491.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CyC98mnmNcxD6BaCubfRMpfYwHdDCxmuGYPwTLMb_1769757986
+2026-01-30 14:26:56,685 - __main__ - INFO - Sleeping 3.7s before accessing https://www.topcv.vn/viec-lam/tts-ai-auto-tro-thanh-bac-thay-tu-dong-hoa-dn/2026491.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CyC98mnmNcxD6BaCubfRMpfYwHdDCxmuGYPwTLMb_1769757986...
+2026-01-30 14:27:01,450 - asyncio - ERROR - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed\nCall log:\n  - navigating to "https://www.topcv.vn/viec-lam/tts-ai-auto-tro-thanh-bac-thay-tu-dong-hoa-dn/2026491.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CyC98mnmNcxD6BaCubfRMpfYwHdDCxmuGYPwTLMb_1769757986", waiting until "domcontentloaded"\n')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+Call log:
+  - navigating to "https://www.topcv.vn/viec-lam/tts-ai-auto-tro-thanh-bac-thay-tu-dong-hoa-dn/2026491.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CyC98mnmNcxD6BaCubfRMpfYwHdDCxmuGYPwTLMb_1769757986", waiting until "domcontentloaded"
+
+2026-01-30 14:29:37,985 - __main__ - INFO - MLflow prompt loaded successfully.
+2026-01-30 14:29:37,996 - __main__ - INFO - --- PHASE 1: CRAWL JOB LINKS STARTED ---
+2026-01-30 14:29:46,319 - __main__ - INFO - Found 50 jobs.
+2026-01-30 14:29:46,319 - __main__ - INFO - Links saved to ./data/raw_links/2026-01-30.jsonl
+2026-01-30 14:29:46,458 - __main__ - INFO - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-01-30 14:29:46,459 - __main__ - INFO - loaded 50 links to process.
+2026-01-30 14:29:46,870 - __main__ - INFO - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CcuimbrYyu0xaRYn85OTjVKG3JtdlFmepFL44YKT_1769758179
+2026-01-30 14:29:46,870 - __main__ - INFO - Sleeping 3.7s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CcuimbrYyu0xaRYn85OTjVKG3JtdlFmepFL44YKT_1769758179...
+2026-01-30 14:29:59,936 - LiteLLM - INFO - 
+LiteLLM completion() model= llama-3.1-8b-instant; provider = groq
+2026-01-30 14:30:02,819 - LiteLLM - INFO - 
+LiteLLM completion() model= llama-3.1-8b-instant; provider = groq
+2026-01-30 14:30:07,265 - LiteLLM - INFO - 
+LiteLLM completion() model= llama-3.1-8b-instant; provider = groq
+2026-01-30 14:30:07,716 - __main__ - INFO - Extracted: Unknown @ Unknown
+2026-01-30 14:30:07,716 - __main__ - INFO - Processing 2/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CcuimbrYyu0xaRYn85OTjVKG3JtdlFmepFL44YKT_1769758179
+2026-01-30 14:30:07,716 - __main__ - INFO - Sleeping 3.1s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=CcuimbrYyu0xaRYn85OTjVKG3JtdlFmepFL44YKT_1769758179...
+2026-01-30 14:33:36,612 - __main__ - INFO - MLflow prompt loaded successfully.
+2026-01-30 14:33:36,623 - __main__ - INFO - --- PHASE 1: CRAWL JOB LINKS STARTED ---
+2026-01-30 14:33:45,426 - __main__ - INFO - Found 50 jobs.
+2026-01-30 14:33:45,426 - __main__ - INFO - Links saved to ./data/raw_links/2026-01-30.jsonl
+2026-01-30 14:33:45,569 - __main__ - INFO - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-01-30 14:33:45,570 - __main__ - INFO - loaded 50 links to process.
+2026-01-30 14:33:45,986 - __main__ - INFO - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=m8XC7GUU2AkGpbyL6f3lArGzoFbtKvF8hbkBh3iG_1769758418
+2026-01-30 14:33:45,986 - __main__ - INFO - Sleeping 3.1s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=m8XC7GUU2AkGpbyL6f3lArGzoFbtKvF8hbkBh3iG_1769758418...
+2026-01-30 14:33:59,808 - __main__ - ERROR - Error extracting https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=m8XC7GUU2AkGpbyL6f3lArGzoFbtKvF8hbkBh3iG_1769758418: 'list' object has no attribute 'get'
+2026-01-30 14:33:59,808 - __main__ - INFO - Processing 2/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=m8XC7GUU2AkGpbyL6f3lArGzoFbtKvF8hbkBh3iG_1769758418
+2026-01-30 14:33:59,808 - __main__ - INFO - Sleeping 4.7s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=m8XC7GUU2AkGpbyL6f3lArGzoFbtKvF8hbkBh3iG_1769758418...
+2026-01-30 14:34:11,454 - __main__ - ERROR - Error extracting https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=m8XC7GUU2AkGpbyL6f3lArGzoFbtKvF8hbkBh3iG_1769758418: 'list' object has no attribute 'get'
+2026-01-30 14:34:11,454 - __main__ - INFO - Processing 3/50: https://www.topcv.vn/viec-lam/tts-ai-auto-tro-thanh-bac-thay-tu-dong-hoa-dn/2026491.html?ta_source=JobSearchList_LinkDetail&u_sr_id=m8XC7GUU2AkGpbyL6f3lArGzoFbtKvF8hbkBh3iG_1769758418
+2026-01-30 14:34:11,454 - __main__ - INFO - Sleeping 4.2s before accessing https://www.topcv.vn/viec-lam/tts-ai-auto-tro-thanh-bac-thay-tu-dong-hoa-dn/2026491.html?ta_source=JobSearchList_LinkDetail&u_sr_id=m8XC7GUU2AkGpbyL6f3lArGzoFbtKvF8hbkBh3iG_1769758418...
+2026-01-30 14:44:21,825 - __main__ - INFO - MLflow prompt loaded successfully.
+2026-01-30 14:44:21,835 - __main__ - INFO - --- PHASE 1: CRAWL JOB LINKS STARTED ---
+2026-01-30 14:44:29,139 - __main__ - INFO - Found 50 jobs.
+2026-01-30 14:44:29,140 - __main__ - INFO - Links saved to ./data/raw_links/2026-01-30.jsonl
+2026-01-30 14:44:29,281 - __main__ - INFO - --- PHASE 2: EXTRACT DETAILS STARTED ---
+2026-01-30 14:44:29,282 - __main__ - INFO - loaded 50 links to process.
+2026-01-30 14:44:29,702 - __main__ - INFO - Processing 1/50: https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=HRdLVuK2yHdmCo7Q6Y1Qn0n486vk4Lbic8rKxdkJ_1769759064
+2026-01-30 14:44:29,702 - __main__ - INFO - Sleeping 5.3s before accessing https://www.topcv.vn/viec-lam/ai-engineer-intern-computer-vision/2026395.html?ta_source=JobSearchList_LinkDetail&u_sr_id=HRdLVuK2yHdmCo7Q6Y1Qn0n486vk4Lbic8rKxdkJ_1769759064...
+2026-01-30 14:44:47,641 - LiteLLM - INFO - 
+LiteLLM completion() model= llama-3.1-8b-instant; provider = groq
+2026-01-30 14:44:49,514 - __main__ - INFO - Extracted: AI Engineer Intern - Computer Vision @ Elcom
+2026-01-30 14:44:49,514 - __main__ - INFO - Processing 2/50: https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=HRdLVuK2yHdmCo7Q6Y1Qn0n486vk4Lbic8rKxdkJ_1769759064
+2026-01-30 14:44:49,516 - __main__ - INFO - Sleeping 5.1s before accessing https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=HRdLVuK2yHdmCo7Q6Y1Qn0n486vk4Lbic8rKxdkJ_1769759064...
+2026-01-30 14:44:55,593 - asyncio - ERROR - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed\nCall log:\n  - navigating to "https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=HRdLVuK2yHdmCo7Q6Y1Qn0n486vk4Lbic8rKxdkJ_1769759064", waiting until "domcontentloaded"\n')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+Call log:
+  - navigating to "https://www.topcv.vn/viec-lam/giang-vien-it-ai-software-dev-data-science/2021544.html?ta_source=JobSearchList_LinkDetail&u_sr_id=HRdLVuK2yHdmCo7Q6Y1Qn0n486vk4Lbic8rKxdkJ_1769759064", waiting until "domcontentloaded"
+

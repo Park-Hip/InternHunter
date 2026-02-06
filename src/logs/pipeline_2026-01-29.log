@@ -1,0 +1,3 @@
+2026-01-29 10:53:00,763 - root - INFO - --- CRAWL JOB LINKS STARTED ---
+2026-01-29 10:53:05,936 - __main__ - INFO - Found 50 jobs.
+2026-01-29 10:53:05,937 - __main__ - INFO - Successfully wrote 50 jobs to ./data/raw_links/2026-01-29.jsonl
