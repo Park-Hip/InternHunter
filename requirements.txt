@@ -6,3 +6,8 @@ playwright
 mlflow
 unidecode
 google-genai
+pydantic
+pydantic-settings
+tenacity
+structlog
+sqlalchemy
