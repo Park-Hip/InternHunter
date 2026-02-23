@@ -6,9 +6,11 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: SecretStr
     GROQ_API_KEY: SecretStr
     DB_PATH: str = "jobs.db"
-    DB_URL: str = "sqlite:///./job-finder.db"
+    # DB_URL: str = "sqlite:///./job-finder.db"
+    DB_URL: SecretStr
     # URL: str = "https://www.topcv.vn/tim-viec-lam-ai-engineer?sort=new&type_keyword=1&saturday_status=0&sba=1"
-    URL: str = "https://www.topcv.vn/tim-viec-lam-ai-engineer?sba=1"
+    # URL: str = "https://www.topcv.vn/tim-viec-lam-ai-engineer?sba=1"
+    URL: str = "https://www.topcv.vn/tim-viec-lam-data-scientist?sba=1"
 
     MAX_RETRIES: int = 3
     RATE_LIMIT_RPM: int = 20

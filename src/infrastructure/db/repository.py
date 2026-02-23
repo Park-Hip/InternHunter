@@ -5,7 +5,7 @@ from datetime import datetime
 import sqlalchemy as db
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, text
 
 from src.infrastructure.db.session import engine, SessionLocal
 from src.infrastructure.db.models import Base, RawJobDB, CleanJobDB
@@ -18,7 +18,37 @@ class JobRepository:
     def create_tables(self):
         """Create raw_jobs and clean_jobs tables."""
         Base.metadata.create_all(bind=engine)
+        self._sync_sequences()
         logger.info("Database tables verified/created")
+
+    def _sync_sequences(self):
+        """Reset PostgreSQL auto-increment sequences to match current max IDs.
+        
+        Prevents 'duplicate key value violates unique constraint' errors
+        caused by sequences being out of sync after migrations or manual inserts.
+        """
+        tables = ["raw_jobs", "clean_jobs"]
+        with SessionLocal() as session:
+            for table in tables:
+                try:
+                    # pg_get_serial_sequence returns the sequence name for the column
+                    seq_query = text(
+                        "SELECT pg_get_serial_sequence(:table, 'id')"
+                    )
+                    seq_name = session.execute(seq_query, {"table": table}).scalar()
+                    if not seq_name:
+                        continue
+
+                    # Reset sequence to MAX(id) + 1 (or 1 if table is empty)
+                    reset_query = text(
+                        f"SELECT setval('{seq_name}', COALESCE((SELECT MAX(id) FROM {table}), 0) + 1, false)"
+                    )
+                    new_val = session.execute(reset_query).scalar()
+                    session.commit()
+                    logger.info("Sequence synced", table=table, sequence=seq_name, next_val=new_val)
+                except Exception as e:
+                    session.rollback()
+                    logger.warning("Failed to sync sequence", table=table, error=str(e))
 
     def get_raw_jobs_count(self) -> int:
         """Returns the total count of raw jobs in the database."""
@@ -100,7 +130,6 @@ class JobRepository:
         """Fetches jobs that have not been parsed yet (not in clean_jobs)."""
         with SessionLocal() as session:
             try:
-                # Left join raw_jobs with clean_jobs where clean_jobs.id is null
                 statement = (
                     select(RawJobDB)
                     .outerjoin(CleanJobDB, RawJobDB.id == CleanJobDB.raw_job_id)
@@ -126,10 +155,18 @@ class JobRepository:
                 logger.error(f"Error fetching unparsed jobs: {e}")
                 return []
 
-    def save_parsed_job(self, parsed: ProcessedJob, raw_job_id: int, original_url: str) -> bool:
-        """Saves parsed job data with proper relationships."""
+    def save_parsed_job(self, parsed: ProcessedJob, raw_job_id: int, original_url: str, embedding: list = None) -> bool:
+        """Saves parsed job data with proper relationships and optional embedding."""
         with SessionLocal() as session:
             try:
+                # Guard: skip if a clean_job already exists for this raw_job
+                existing = session.execute(
+                    select(CleanJobDB).where(CleanJobDB.raw_job_id == raw_job_id)
+                ).scalar_one_or_none()
+                if existing:
+                    logger.warning("Clean job already exists, skipping", raw_job_id=raw_job_id, url=original_url)
+                    return True
+
                 clean_job = CleanJobDB(
                     raw_job_id=raw_job_id,
                     standardized_title=parsed.standardized_title,
@@ -138,7 +175,7 @@ class JobRepository:
                     description=parsed.description,
                     requirement=parsed.requirement,
                     benefit=parsed.benefit,
-                    cities=parsed.cities, # SQLAlchemy JSON type handles list/dict
+                    cities=parsed.cities,
                     experience=parsed.experience,
                     min_gpa=parsed.min_gpa,
                     english_requirement=parsed.english_requirement,
@@ -146,21 +183,80 @@ class JobRepository:
                     salary_max=parsed.salary_max,
                     currency=parsed.currency,
                     is_salary_negotiable=parsed.is_salary_negotiable,
-                    tech_stack=parsed.tech_stack, # SQLAlchemy JSON type
-                    technical_competencies=parsed.technical_competencies, # SQLAlchemy JSON type
-                    domain_knowledge=parsed.domain_knowledge # SQLAlchemy JSON type
+                    tech_stack=parsed.tech_stack,
+                    technical_competencies=parsed.technical_competencies,
+                    domain_knowledge=parsed.domain_knowledge,
+                    embedding=embedding,
                 )
                 session.add(clean_job)
                 session.commit()
                 return True
             except IntegrityError as e:
                 session.rollback()
-                logger.error(f"Integrity error saving parsed job for {original_url}: {e}")
+                logger.error("Integrity error saving parsed job", original_url=original_url, error=str(e))
                 return False
             except Exception as e:
                 session.rollback()
-                logger.error(f"Failed to save parsed job for {original_url}: {e}")
+                logger.error("Failed to save parsed job", original_url=original_url, error=str(e))
                 return False
+
+    # Function for agents to use
+    def search_jobs_by_criteria(
+        self,
+        title: List[str] = None,
+        job_level: List[str] = None, # Avoid importing Literal here just to keep model separation clean, validation happens at Pydantic level
+        cities: List[str] = None,
+        experience: int = None,
+        limit: int = 10
+    ) -> List[Dict[str, Any]]:
+        """
+        Tool meant specifically for the AI agent to search jobs safely.
+        Dynamically applies filters based on what the user asked for.
+        """
+        try:
+            with SessionLocal() as session:
+                statement = select(CleanJobDB).outerjoin(RawJobDB, RawJobDB.id == CleanJobDB.raw_job_id)
+                
+                # 2. Dynamic AND conditions
+                if title:
+                    statement = statement.where(CleanJobDB.standardized_title.in_(title))
+                
+                if job_level:
+                    statement = statement.where(CleanJobDB.job_level.in_(job_level))
+
+                if experience is not None:
+                    statement = statement.where(CleanJobDB.experience <= experience)
+
+                if cities:
+                    # Handle searching inside a JSON column.
+                    # This casts the JSON 'cities' column to text and checks if the requested city is a substring.
+                    # It creates an OR condition for the cities requested.
+                    from sqlalchemy import or_
+                    city_conditions = [CleanJobDB.cities.cast(db.String).ilike(f"%{city}%") for city in cities]
+                    statement = statement.where(or_(*city_conditions))
+
+                statement = statement.limit(limit)
+                result = session.execute(statement).scalars().all()
+
+                mapped_jobs = []
+                for job in result:
+                    mapped_jobs.append({
+                        "title": job.standardized_title or "Unknown",
+                        "level": job.job_level or "Unknown",
+                        "company": job.raw_job.company if job.raw_job else "Unknown",
+                        "cities": list(job.cities) if job.cities else [],
+                        "experience_required_years": job.experience,
+                        "salary_range": f"{job.salary_min or '?'} - {job.salary_max or '?'} {job.currency}",
+                        "tech_stack": list(job.tech_stack) if job.tech_stack else [],
+                        "url": job.raw_job.url if job.raw_job else "#"
+                    })
+
+                return mapped_jobs
+
+        except Exception as e:
+            logger.error(f"Failed to search job by criteria: {e}")
+            return []
+            
 
     @staticmethod
     def normalize_url(url: str) -> str:

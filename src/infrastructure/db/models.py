@@ -3,7 +3,8 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()    
+Base = declarative_base() 
+from pgvector.sqlalchemy import Vector
 
 class RawJobDB(Base):
     __tablename__ = 'raw_jobs'
@@ -48,6 +49,8 @@ class CleanJobDB(Base):
     tech_stack = Column(JSON)             # Tools: ["Python", "AWS"]
     technical_competencies = Column(JSON) # Actions: ["Deploy Models", "Fine-tune LLMs"]
     domain_knowledge = Column(JSON)       # Context: ["Banking", "E-commerce, NLP, Computer Vision, LLM, RAG"]
+    
+    embedding = Column(Vector(768))
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

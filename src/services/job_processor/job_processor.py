@@ -2,6 +2,7 @@ import time
 
 from src.infrastructure.llm.router import llm_router
 from src.infrastructure.db.repository import JobRepository
+from src.services.job_processor.embedder import Embedder
 from src.config import settings
 from src.infrastructure.logging import get_logger
 
@@ -10,7 +11,19 @@ logger = get_logger(__name__)
 class JobProcessor():
 
     def __init__(self):
-        self.llm = llm_router.get_client()
+        self.router = llm_router
+        self.embedder = Embedder()
+
+    def _build_embedding_text(self, parsed_result) -> str:
+        """Build a text representation of the parsed job for embedding."""
+        parts = []
+        if parsed_result.standardized_title:
+            parts.append(parsed_result.standardized_title)
+        if parsed_result.description:
+            parts.append(parsed_result.description)
+        if parsed_result.technical_competencies:
+            parts.append(", ".join(parsed_result.technical_competencies))
+        return "\n".join(parts)
 
     def process_jobs(self, limit: int = 100):
         logger.info("Job processing cycle starting", limit=limit)
@@ -27,15 +40,23 @@ class JobProcessor():
                 time.sleep(sleep_time)
 
             try:
-                # Assuming llm.parse_raw_job returns a StandardJob or similar
-                # We need to make sure 'self.llm' is mocked or compatible.
-                # Assuming existing code structure is compatible with new models if types match.
-                parsed_result = self.llm.process_raw_job(job)
+                # Step 1: Parse the job with LLM (Gemini -> Groq fallback)
+                parsed_result = self.router.process_with_fallback(job)
 
-                if repo.save_parsed_job(parsed_result, job.id, job.url):
+                # Step 2: Generate embedding from parsed content
+                embedding = None
+                text_to_embed = self._build_embedding_text(parsed_result)
+                if text_to_embed.strip():
+                    try:
+                        embedding = self.embedder.generate_embedding(text_to_embed)
+                        logger.info("Embedding generated", job_title=job.title)
+                    except Exception as e:
+                        logger.warning("Embedding failed, saving job without it", job_id=job.id, error=str(e))
+
+                # Step 3: Save parsed job + embedding together
+                if repo.save_parsed_job(parsed_result, job.id, job.url, embedding=embedding):
                     success_count += 1
-                    logger.info("Parsed job saved", job_title=job.title)
-
+                    logger.info("Parsed job saved", job_title=job.title, has_embedding=embedding is not None)
                 else:
                     fail_count += 1
                 
@@ -48,6 +69,3 @@ class JobProcessor():
 def run_pipeline(limit: int = 10):
     processor = JobProcessor()
     processor.process_jobs(limit=limit)
-
-
-

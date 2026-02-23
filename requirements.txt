@@ -11,3 +11,6 @@ pydantic-settings
 tenacity
 structlog
 sqlalchemy
+psycopg2-binary
+langdetect
+groq
