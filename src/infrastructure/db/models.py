@@ -2,9 +2,10 @@ from sqlalchemy import Column, Integer, Boolean, String, JSON, Float, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from pgvector.sqlalchemy import Vector
+import uuid
 
 Base = declarative_base() 
-from pgvector.sqlalchemy import Vector
 
 class RawJobDB(Base):
     __tablename__ = 'raw_jobs'
@@ -55,4 +56,22 @@ class CleanJobDB(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     raw_job = relationship("RawJobDB", back_populates="clean_job")
-    
+
+class ChatSessionDB(Base):
+    __tablename__ = 'chat_sessions'
+    id = Column (String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    messages = relationship("ChatMessageDB", back_populates="session", cascade="all, delete-orphan")
+
+class ChatMessageDB(Base):
+    __tablename__ = 'chat_messages'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(String, ForeignKey("chat_sessions.id"), index=True)
+    role = Column(String)
+    content = Column(Text, nullable=True)
+    tool_calls = Column(JSON, nullable=True)
+    tool_call_id = Column(String, nullable=True)
+    tokens_used = Column(Integer, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    session = relationship("ChatSessionDB", back_populates="messages")

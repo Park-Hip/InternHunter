@@ -8,8 +8,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, func, and_, text
 
 from src.infrastructure.db.session import engine, SessionLocal
-from src.infrastructure.db.models import Base, RawJobDB, CleanJobDB
+from src.infrastructure.db.models import Base, RawJobDB, CleanJobDB, ChatSessionDB, ChatMessageDB
 from src.core.models import ProcessedJob, RawJob
+from src.core.models.chat import Message
 from src.infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
@@ -264,3 +265,67 @@ class JobRepository:
         if not url or not isinstance(url, str):
             return ""
         return url.split("?")[0].split("#")[0].strip()
+
+class MemoryRepository:
+    def create_tables(self):
+        """Create raw_jobs and clean_jobs tables."""
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables verified/created")
+
+    def load_messages(self, session_id: str, limit: int = 10) -> List[Message]:
+        with SessionLocal() as session:
+            try:
+                statement = (
+                    select(ChatMessageDB)
+                    .where(ChatMessageDB.session_id == session_id)
+                    .order_by(ChatMessageDB.created_at.desc())
+                    .limit(limit)
+                )
+                result = session.execute(statement).scalars().all()
+                messages = reversed(result)
+
+                return [
+                    Message(
+                        role=m.role,
+                        content=m.content,
+                        tool_calls=m.tool_calls,
+                        tool_call_id=m.tool_call_id
+                    ) for m in messages
+                ]
+            except Exception as e:
+                logger.error("Failed to load messages from ChatMessageDB", error=str(e))
+                raise
+
+    def save_messages(self, session_id: str, messages: List[Message], limit: int = 10):
+        with SessionLocal() as session:
+            try:
+                statement = select(ChatSessionDB).where(ChatSessionDB.id == session_id)
+                chat_session = session.execute(statement).scalar_one_or_none()
+                if not chat_session:
+                    user_id = None
+                    for m in messages:
+                        if m.user_id:
+                            user_id = m.user_id
+                            break
+                    chat_session = ChatSessionDB(id=session_id, user_id=user_id)
+                    session.add(chat_session)
+                    session.commit()
+
+                if len(messages) > limit:
+                    messages = messages[-limit:]
+                    
+                for message in messages:
+                    new_message = ChatMessageDB(
+                        role = message.role,
+                        content = message.content,
+                        user_id = message.user_id,
+                        session_id = session_id,
+                        tokens_used = message.tokens_used,
+                        tool_calls = message.tool_calls,
+                        tool_call_id = message.tool_call_id
+                    )
+                    session.add(new_message)
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                logger.error("Failed save messages to ChatMessageDB", error=str(e))
