@@ -13,7 +13,6 @@ from groq import Groq
 
 logger = get_logger(__name__)
 
-# --- Optional: MLflow integration ---
 try:
     import mlflow
     if os.getenv("MLFLOW_TRACKING_URI"):
@@ -26,14 +25,22 @@ except ImportError:
     logger.info("MLflow not available, skipping autolog setup.")
 
 
-def _load_prompt():
-    """Attempt to load prompt from MLflow, return None on failure."""
-    if not _mlflow_available:
-        return None
+def _load_prompt(prompt_name: str = "job_processor"):
+    """Attempt to load prompt template from MLflow using alias, fallback to local file."""
+    if _mlflow_available:
+        try:
+            return mlflow.genai.load_prompt(f"prompts:/{prompt_name}@production").template
+        except Exception as e:
+            logger.warning(f"MLflow prompt {prompt_name} load failed, trying local file", error=str(e))
+            
+    # Fallback to loading from local file
     try:
-        return mlflow.genai.load_prompt("prompts:/job_processor_prompt/4")
+        from src.config import settings
+        prompt_path = settings.BASE_DIR / "src" / "infrastructure" / "llm" / "prompts" / f"{prompt_name}.txt"
+        with open(prompt_path, "r", encoding="utf-8") as f:
+            return f.read()
     except Exception as e:
-        logger.warning("MLflow prompt load failed, using fallback", error=str(e))
+        logger.error(f"Failed to load prompt {prompt_name} from local file fallback", error=str(e))
         return None
 
 
@@ -79,7 +86,7 @@ class GeminiClient(LLMProvider):
         """Generates structured job data from raw dictionary using Gemini."""
         raw_context, description, requirement, benefit = self._prepare_job_context(job_data)
 
-        prompt_template = _load_prompt()
+        prompt_template = _load_prompt(prompt_name="job_processor")
         job_processor_prompt = _build_prompt(prompt_template, job_data, raw_context, description, requirement)
 
         result = self.client.models.generate_content(
@@ -140,7 +147,7 @@ class GroqClient(LLMProvider):
         """Generates structured job data from raw dictionary using Groq."""
         raw_context, description, requirement, benefit = self._prepare_job_context(job_data)
 
-        prompt_template = _load_prompt()
+        prompt_template = _load_prompt(prompt_name="job_processor")
         job_processor_prompt = _build_prompt(prompt_template, job_data, raw_context, description, requirement)
 
         response = self.client.chat.completions.create(

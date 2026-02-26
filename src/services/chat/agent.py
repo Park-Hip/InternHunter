@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from src.services.chat.memory import ChatMemory
 from src.infrastructure.logging import get_logger
 from src.services.chat.tool_registry import get_all_tool_schemas, execute_tool
+from src.core.models.chat import ChatResponse, ToolCallInfo, Message, ChatRequest
+from src.infrastructure.llm.agent_provider import AgentLLMClient
 
 logger = get_logger(__name__)
 load_dotenv()
@@ -23,45 +25,108 @@ except ImportError:
     _mlflow_available = False
     logger.info("MLflow not available, skipping autolog setup.")
 
-def run_chat_agent(user_input: str, memory: ChatMemory, model: str = "openai/gpt-oss-120b") -> str:
-    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+def run_chat_agent(
+        request: ChatRequest, 
+        max_iteration: int = 5
+    ) -> ChatResponse:
+    memory = ChatMemory(session_id=request.session_id)
+    llm = AgentLLMClient()
+
     if _mlflow_available:
         mlflow.groq.autolog()
-        SYSTEM_PROMPT = mlflow.genai.load_prompt("prompts:/system_prompt/1").template
-    else: 
-        from src.infrastructure.llm.prompt.prompt import SYSTEM_PROMPT
-    
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-    history = memory.get_messages()
-    messages.extend(history)
-    messages.append({"role": "user", "content": user_input})
-
-    while True:
         try:
-            response = client.chat.completions.create(
-                model=model,
-                messages=messages,
-                tools=get_all_tool_schemas()
-            )
-            assistant_msg = response.choices[0].message
-            messages.append(assistant_msg)
+            SYSTEM_PROMPT = mlflow.genai.load_prompt("prompts:/agent_system@production").template
+        except Exception:
+            _mlflow_available = False 
+    
+    if not _mlflow_available:
+        from src.config import settings
+        prompt_path = settings.BASE_DIR / "src" / "infrastructure" / "llm" / "prompts" / "agent_system.txt"
+        with open(prompt_path, "r", encoding="utf-8") as f:
+            SYSTEM_PROMPT = f.read()
+    
+    old_messages = memory.load()
+    user_message = [Message(
+        role = "user",
+        content = request.user_message,
+        session_id = request.session_id,
+        user_id = request.user_id,
+        # tokens_used
+    )]
+    if len(old_messages) == 0:
+        system_message = [Message(
+            role = 'system',
+            content = SYSTEM_PROMPT,
+            session_id = request.session_id,
+            user_id = request.user_id,
+        )]
+        messages = system_message + old_messages + user_message
+    else:
+        messages = old_messages + user_message
 
-            if assistant_msg.tool_calls:
-                for tool_call in assistant_msg.tool_calls:
-                    function_response = execute_tool(tool_call.function.name, json.loads(tool_call.function.arguments))
-                    messages.append({
-                        "role": "tool",
-                        "tool_call_id": tool_call.id,
-                        "name": tool_call.function.name,
-                        "content": json.dumps(function_response, default=str)
-                    })
-            else:
-                memory.add_messages([
-                    {"role": "user", "content": user_input},
-                    {"role": "assistant", "content": assistant_msg.content}
-                ])
-                return assistant_msg.content
+    tool_calls_made = []
+
+    for i in range(max_iteration):
+        try: 
+            agent_response = llm.chat_completion(messages=messages)
+
+            assistant_msg = Message(
+                role="assistant",
+                content=agent_response.content,
+                tool_calls=agent_response.tool_calls,
+                session_id=request.session_id,
+                user_id=request.user_id,
+                tokens_used=agent_response.usage.get("completion_tokens") if agent_response.usage else None
+            )
+            messages.append(assistant_msg)
+            
+            if not agent_response.tool_calls:
+                memory.save(messages) # Save everything to DB
+                return ChatResponse(
+                    user_id=request.user_id,
+                    session_id=request.session_id,
+                    tool_calls_made=tool_calls_made,
+                    message=agent_response.content or ""
+                )
+
+            for tool_call in agent_response.tool_calls:
+                tool_name = tool_call.get("function", {}).get("name")
+                
+                try:
+                    arguments = json.loads(tool_call.get("function", {}).get("arguments", "{}"))
+                except json.JSONDecodeError:
+                    arguments = {}
+  
+                tool_calls_made.append(ToolCallInfo(tool_name=tool_name, arguments=arguments))
+
+                tool_result = execute_tool(tool_name, arguments)
+
+                tool_msg = Message(
+                    role="tool",
+                    content=json.dumps(tool_result, default=str), # Convert dict to string
+                    tool_call_id=tool_call.get("id"), # EXTREMELY IMPORTANT: Link it back!
+                    session_id=request.session_id,
+                    user_id=request.user_id
+                )
+
+                messages.append(tool_msg)
 
         except Exception as e:
             logger.warning("Run chat agent failed", error=str(e))
-            return f"Sorry, I encountered an error: {e}"
+            raise e
+
+    final_fallback_msg = Message(
+        role="assistant",
+        content="I have exceeded my maximum allowed steps and must stop. Please try asking again.",
+        session_id=request.session_id,
+        user_id=request.user_id
+    )
+    messages.append(final_fallback_msg)
+    memory.save(messages)
+    
+    return ChatResponse(
+        user_id=request.user_id,
+        session_id=request.session_id,
+        tool_calls_made=tool_calls_made,
+        message=final_fallback_msg.content
+    )

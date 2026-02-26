@@ -5,7 +5,7 @@ from typing import List
 from src.infrastructure.db.session import  SessionLocal
 from src.infrastructure.db.models import Base, ChatMessageDB, ChatSessionDB
 from src.infrastructure.logging import get_logger
-from src.core.models.chat import Message
+from src.core.models.chat import Message    
 from src.infrastructure.db.repository import MemoryRepository
 
 logger = get_logger(__name__)

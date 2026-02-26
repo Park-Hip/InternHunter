@@ -329,3 +329,8 @@ class MemoryRepository:
             except Exception as e:
                 session.rollback()
                 logger.error("Failed save messages to ChatMessageDB", error=str(e))
+
+        def get_user_sessions(self, user_id: str) -> List[dict]:
+            with SessionLocal() as session:
+                try:
+                    statement
