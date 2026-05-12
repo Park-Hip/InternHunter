@@ -120,7 +120,7 @@ class Crawler:
 
         return page_links, None
 
-    async def fetch_job_links(self, run_id: str) -> FetchOutcome:
+    async def fetch_job_links(self, run_id: str, limit: int | None = None) -> FetchOutcome:
         """Fetches job URLs from all configured search pages with pagination.
 
         Iterates through all search URLs (DS_URL, AIE_URL, etc.) and paginates
@@ -134,6 +134,7 @@ class Crawler:
         all_links = []
         total_pages_scraped = 0
         last_error_status = None
+        reached_limit = False
 
         try:
             async with AsyncWebCrawler(config=browser_config) as crawler:
@@ -163,6 +164,19 @@ class Crawler:
                         logger.info("Page scraped", phase="fetch_links", page=page,
                                     links_on_page=len(page_links), total_so_far=len(all_links))
 
+                        if limit is not None and len(all_links) >= limit:
+                            reached_limit = True
+                            logger.info(
+                                "Fetch links limit reached",
+                                phase="fetch_links",
+                                limit=limit,
+                                total_so_far=len(all_links),
+                            )
+                            break
+
+                    if reached_limit:
+                        break
+
             # Dedup against database
             if not all_links:
                 status = last_error_status or FetchStatus.NO_NEW
@@ -183,6 +197,9 @@ class Crawler:
                     total_scraped=len(all_links),
                     pages_scraped=total_pages_scraped
                 )
+
+            if limit is not None and len(new_links) > limit:
+                new_links = new_links[:limit]
 
             return FetchOutcome(
                 status=FetchStatus.SUCCESS,

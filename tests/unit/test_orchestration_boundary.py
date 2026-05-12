@@ -1,5 +1,9 @@
+import pytest
+
+from src.core.models.fetch_result import FetchOutcome, FetchStatus
 from src.internhunter.orchestration.flows import job_ingestion_flow, run_production_pipeline
 from src.internhunter.orchestration.ingestion_flow import job_ingestion_flow as canonical_ingestion_flow
+import src.internhunter.orchestration.ingestion_flow as ingestion_flow_module
 from src.internhunter.orchestration.tasks import (
     acquire_job_task,
     fetch_job_links_task,
@@ -22,3 +26,130 @@ def test_orchestration_imports_resolve():
     assert legacy_fetch_job_links_task is fetch_job_links_task
     assert legacy_acquire_job_task is acquire_job_task
     assert legacy_process_pending_jobs_task is process_pending_jobs_task
+
+
+@pytest.mark.asyncio
+async def test_job_ingestion_flow_limits_crawl_to_requested_job_count(mocker):
+    captured = {"fetch_limit": None, "crawl_count": None, "process_limit": None}
+
+    async def fake_fetch_links_task(run_id, limit=None):
+        captured["fetch_limit"] = limit
+        return FetchOutcome(
+            status=FetchStatus.SUCCESS,
+            links=[
+                {"url": "https://example.com/job/1"},
+                {"url": "https://example.com/job/2"},
+                {"url": "https://example.com/job/3"},
+                {"url": "https://example.com/job/4"},
+            ],
+            total_scraped=4,
+            pages_scraped=1,
+        )
+
+    async def fake_crawl_jobs_task(links, run_id):
+        captured["crawl_count"] = len(links)
+        return len(links), 0
+
+    async def fake_process_jobs_task(limit):
+        captured["process_limit"] = limit
+        return 3, 0
+
+    class DummyRepo:
+        def create_tables(self):
+            return None
+
+        def save_pipeline_run_summary(self, **kwargs):
+            return None
+
+    mocker.patch.object(ingestion_flow_module, "configure_logging", return_value=None)
+    mocker.patch.object(ingestion_flow_module, "fetch_links_task", side_effect=fake_fetch_links_task)
+    mocker.patch.object(ingestion_flow_module, "crawl_jobs_task", side_effect=fake_crawl_jobs_task)
+    mocker.patch.object(ingestion_flow_module, "process_jobs_task", side_effect=fake_process_jobs_task)
+    mocker.patch.object(ingestion_flow_module, "ETLRepository", return_value=DummyRepo())
+
+    await canonical_ingestion_flow(limit=3)
+
+    assert captured["fetch_limit"] == 3
+    assert captured["crawl_count"] == 3
+    assert captured["process_limit"] == 3
+
+
+@pytest.mark.asyncio
+async def test_job_ingestion_flow_skips_when_no_new_links_after_dedup(mocker):
+    captured = {"fetch_limit": None, "crawl_called": False, "process_called": False}
+
+    async def fake_fetch_links_task(run_id, limit=None):
+        captured["fetch_limit"] = limit
+        return FetchOutcome(
+            status=FetchStatus.NO_NEW,
+            links=[],
+            total_scraped=4,
+            pages_scraped=2,
+        )
+
+    async def fake_crawl_jobs_task(links, run_id):
+        captured["crawl_called"] = True
+        return len(links), 0
+
+    async def fake_process_jobs_task(limit):
+        captured["process_called"] = True
+        return 0, 0
+
+    class DummyRepo:
+        def create_tables(self):
+            return None
+
+        def save_pipeline_run_summary(self, **kwargs):
+            return None
+
+    mocker.patch.object(ingestion_flow_module, "configure_logging", return_value=None)
+    mocker.patch.object(ingestion_flow_module, "fetch_links_task", side_effect=fake_fetch_links_task)
+    mocker.patch.object(ingestion_flow_module, "crawl_jobs_task", side_effect=fake_crawl_jobs_task)
+    mocker.patch.object(ingestion_flow_module, "process_jobs_task", side_effect=fake_process_jobs_task)
+    mocker.patch.object(ingestion_flow_module, "ETLRepository", return_value=DummyRepo())
+
+    await canonical_ingestion_flow(limit=3)
+
+    assert captured["fetch_limit"] == 3
+    assert captured["crawl_called"] is False
+    assert captured["process_called"] is False
+
+
+@pytest.mark.asyncio
+async def test_job_ingestion_flow_skips_when_fetch_links_fails(mocker):
+    captured = {"crawl_called": False, "process_called": False}
+
+    async def fake_fetch_links_task(run_id, limit=None):
+        return FetchOutcome(
+            status=FetchStatus.NETWORK_FAIL,
+            links=[],
+            total_scraped=0,
+            pages_scraped=0,
+            error="network down",
+        )
+
+    async def fake_crawl_jobs_task(links, run_id):
+        captured["crawl_called"] = True
+        return len(links), 0
+
+    async def fake_process_jobs_task(limit):
+        captured["process_called"] = True
+        return 0, 0
+
+    class DummyRepo:
+        def create_tables(self):
+            return None
+
+        def save_pipeline_run_summary(self, **kwargs):
+            return None
+
+    mocker.patch.object(ingestion_flow_module, "configure_logging", return_value=None)
+    mocker.patch.object(ingestion_flow_module, "fetch_links_task", side_effect=fake_fetch_links_task)
+    mocker.patch.object(ingestion_flow_module, "crawl_jobs_task", side_effect=fake_crawl_jobs_task)
+    mocker.patch.object(ingestion_flow_module, "process_jobs_task", side_effect=fake_process_jobs_task)
+    mocker.patch.object(ingestion_flow_module, "ETLRepository", return_value=DummyRepo())
+
+    await canonical_ingestion_flow(limit=3)
+
+    assert captured["crawl_called"] is False
+    assert captured["process_called"] is False

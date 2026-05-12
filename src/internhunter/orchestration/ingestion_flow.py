@@ -13,10 +13,10 @@ logger = get_logger(__name__)
 
 
 @task(retries=3, retry_delay_seconds=60)
-async def fetch_links_task(run_id: str) -> FetchOutcome:
+async def fetch_links_task(run_id: str, limit: int | None = None) -> FetchOutcome:
     logger.info("Task: Fetching job links")
     crawler = Crawler()
-    return await crawler.fetch_job_links(run_id)
+    return await crawler.fetch_job_links(run_id, limit=limit)
 
 
 @task(retries=2, retry_delay_seconds=300)
@@ -44,10 +44,20 @@ async def job_ingestion_flow(limit: int = 20):
     repo = ETLRepository()
     repo.create_tables()
 
-    outcome = await fetch_links_task(run_id)
+    outcome = await fetch_links_task(run_id, limit=limit)
+    logger.info(
+        "Fetch links completed",
+        run_id=run_id,
+        limit=limit,
+        status=outcome.status.value,
+        links_returned=outcome.new_count,
+        pages_scraped=outcome.pages_scraped,
+        total_scraped=outcome.total_scraped,
+    )
 
     if outcome.is_success and outcome.links:
-        extracted, extract_failed = await crawl_jobs_task(outcome.links, run_id)
+        crawl_links = outcome.links[:limit] if limit is not None else outcome.links
+        extracted, extract_failed = await crawl_jobs_task(crawl_links, run_id)
         processed, process_failed = await process_jobs_task(limit=limit)
 
         repo.save_pipeline_run_summary(
@@ -65,15 +75,24 @@ async def job_ingestion_flow(limit: int = 20):
             processed=processed,
             pages_scraped=outcome.pages_scraped,
         )
+    elif not outcome.is_success:
+        logger.info(
+            "Skipping crawl and process because fetch links did not succeed.",
+            run_id=run_id,
+            limit=limit,
+            status=outcome.status.value,
+            error=outcome.error,
+        )
     else:
         status_label = outcome.status.value
         logger.info(
-            "Pipeline finished without processing.",
+            "Skipping crawl and process because no new links were available after dedup.",
             run_id=run_id,
             reason=status_label,
+            limit=limit,
+            links_returned=outcome.new_count,
             total_scraped=outcome.total_scraped,
             pages_scraped=outcome.pages_scraped,
-            error=outcome.error,
         )
 
         repo.save_pipeline_run_summary(

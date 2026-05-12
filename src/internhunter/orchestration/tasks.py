@@ -11,10 +11,10 @@ logger = get_logger(__name__)
 
 
 @task(retries=3, retry_delay_seconds=60)
-async def fetch_job_links_task(run_id: str, url: str) -> List[dict]:
+async def fetch_job_links_task(run_id: str, url: str, limit: int | None = None) -> List[dict]:
     """Fetches job URLs from the search page."""
     crawler = Crawler()
-    links = await crawler.fetch_job_links(run_id)
+    links = await crawler.fetch_job_links(run_id, limit=limit)
     return links or []
 
 
