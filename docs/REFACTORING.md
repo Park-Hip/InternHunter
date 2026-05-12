@@ -1,5 +1,7 @@
 # Refactoring
 
+See also: [REFACTORING_ROADMAP.md](./REFACTORING_ROADMAP.md) for the recommended module order and first refactor steps.
+
 ## Safe Order
 
 1. Read the relevant docs and tests.

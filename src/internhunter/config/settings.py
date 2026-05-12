@@ -23,8 +23,8 @@ class Settings(BaseSettings):
     DS_URL: str = "https://www.topcv.vn/tim-viec-lam-data-scientist?sba=1"
     AIE_URL: str = "https://www.topcv.vn/tim-viec-lam-ai-engineer?sba=1"
 
-    APP_NAME: str = "internhunter"
-    APP_VERSION: str = "0.1.0"
+    APP_NAME: str = "job-finder"
+    APP_VERSION: str = "2.0.0"
     ENVIRONMENT: str = "development"
     BASE_DIR: Path = Path(__file__).resolve().parents[3]
 
@@ -67,3 +67,4 @@ def load_settings() -> Settings:
 
 settings = load_settings()
 
+__all__ = ["CrawlerSettings", "Settings", "load_settings", "settings"]
