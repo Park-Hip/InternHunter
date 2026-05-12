@@ -4,9 +4,9 @@ import json
 from groq import Groq
 from dotenv import load_dotenv
 
-from src.services.chat.memory import ChatMemory
+from src.internhunter.chat.memory import ChatMemory
 from src.infrastructure.logging import get_logger
-from src.services.chat.tool_registry import get_all_tool_schemas, execute_tool
+from src.internhunter.chat.tool_registry import get_all_tool_schemas, execute_tool
 from src.core.models.chat import ChatResponse, ToolCallInfo, Message, ChatRequest
 from src.infrastructure.llm.agent_provider import AgentLLMClient
 from src.config.settings import settings

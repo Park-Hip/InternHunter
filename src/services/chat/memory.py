@@ -20,3 +20,6 @@ class ChatMemory:
     def save(self, messages: List[Message]):
         self.repo.save_messages(session_id=self.session_id, messages=messages, limit=self.limit)
 
+
+__all__ = ["ChatMemory"]
+

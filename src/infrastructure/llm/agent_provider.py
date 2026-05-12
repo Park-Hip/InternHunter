@@ -2,7 +2,7 @@ from typing import List
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from src.internhunter.llm.providers import GroqClient
-from src.services.chat.tool_registry import get_all_tool_schemas
+from src.internhunter.chat.tool_registry import get_all_tool_schemas
 from src.config.settings import settings
 from src.infrastructure.logging import get_logger
 from src.core.models.chat import AgentResponse, Message

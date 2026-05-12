@@ -78,3 +78,6 @@ def execute_tool(tool_name: str, arguments: dict):
     
     function_to_call = _TOOL_REGISTRY[tool_name]['function']
     return function_to_call(**arguments)
+
+
+__all__ = ["register_tool", "get_all_tool_schemas", "execute_tool"]
