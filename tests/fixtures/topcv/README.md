@@ -10,11 +10,14 @@ Current purpose:
 Current fixtures:
 - `normal_job.html`
 - `normal_job.extracted.json`
+- `missing_salary.html`
+- `missing_salary.extracted.json`
+- `negotiable_salary.html`
+- `negotiable_salary.extracted.json`
+- `multiple_locations.html`
+- `multiple_locations.extracted.json`
 
 Planned additions:
-- missing salary
-- negotiable salary
-- multiple locations
 - internship/fresher
 - expired/deadline edge case
 - malformed page
