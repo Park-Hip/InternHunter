@@ -42,3 +42,6 @@ dev = [
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 norecursedirs = ["src/scripts", "src/scripts/*"]
+markers = [
+    "integration_db: tests that require a live configured PostgreSQL database",
+]

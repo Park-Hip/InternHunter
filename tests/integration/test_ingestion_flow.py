@@ -1,7 +1,16 @@
+import os
 import pytest
 from prefect.testing.utilities import prefect_test_harness
 from src.flows.ingestion_flow import job_ingestion_flow
 from src.infrastructure.db.models import PipelineRunDB
+
+pytestmark = [
+    pytest.mark.integration_db,
+    pytest.mark.skipif(
+        os.getenv("RUN_DB_TESTS") != "1",
+        reason="This integration test requires a live configured PostgreSQL database.",
+    ),
+]
 
 @pytest.fixture(autouse=True, scope="session")
 def prefect_test_fixture():
