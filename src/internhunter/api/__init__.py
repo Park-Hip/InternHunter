@@ -1,2 +1,3 @@
-"""API namespace for future migrated HTTP routes."""
+from .routes import router
 
+__all__ = ["router"]
