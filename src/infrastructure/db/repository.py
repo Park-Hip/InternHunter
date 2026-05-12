@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, func, and_, text
 
 from src.infrastructure.db.session import engine, SessionLocal
-from src.infrastructure.db.models import Base, RawJobDB, CleanJobDB, ChatSessionDB, ChatMessageDB
+from src.infrastructure.db.models import Base, RawJobDB, CleanJobDB, ChatSessionDB, ChatMessageDB, UserProfileDB, AuditJobDB
 from src.core.models import ProcessedJob, RawJob
 from src.core.models.chat import Message
 from src.infrastructure.logging import get_logger
@@ -63,6 +63,15 @@ class JobRepository:
                 logger.error(f"Error counting raw jobs: {e}")
                 return 0
 
+    def get_raw_job_by_id(self, raw_job_id) -> RawJob:
+        with SessionLocal() as session:
+            try:
+                statement = select(RawJobDB).where(RawJobDB.id == None)
+                result = session.execute(statement).scalar()
+                return result
+            except Exception as e:
+                logger.error("Falied to get raw job by id", error=str(e))
+
     def filter_new_links(self, unfiltered_links: List[dict]) -> List[dict]:
         """Filters out links that already exist in the raw_jobs."""
         if not unfiltered_links:
@@ -110,10 +119,14 @@ class JobRepository:
             try:
                 raw_job = RawJobDB(
                     url=job_data['url'],
-                    title=job_data['title'],
-                    company=job_data['company'],
-                    location=job_data['location'],
-                    full_json_dump=job_data['full_json_dump'] # SQLAlchemy handles JSON serialization for JSON type
+                    title=job_data.get('title'),
+                    company=job_data.get('company'),
+                    location=job_data.get('location'),
+                    full_json_dump=job_data.get('full_json_dump'),
+                    status=job_data.get('status', 'pending'),
+                    extraction_method=job_data.get('extraction_method', 'css'),
+                    raw_markdown=job_data.get('raw_markdown'),
+                    retry_count=job_data.get('retry_count', 0)
                 )
                 session.add(raw_job)
                 session.commit()
@@ -125,6 +138,69 @@ class JobRepository:
             except Exception as e:
                 session.rollback()
                 logger.error(f"Failed to save raw job {job_data.get('url')}: {e}")
+                return False
+
+    def save_to_audit(self, audit_data: Dict[str, Any]) -> bool:
+        """Saves a failed job entry to the audit_jobs (DLQ)."""
+        with SessionLocal() as session:
+            try:
+                audit_entry = AuditJobDB(
+                    url=audit_data['url'],
+                    error_type=audit_data.get('error_type'),
+                    error_message=audit_data.get('error_message'),
+                    screenshot_path=audit_data.get('screenshot_path'),
+                    html_content=audit_data.get('html_content')
+                )
+                session.add(audit_entry)
+                session.commit()
+                return True
+            except Exception as e:
+                session.rollback()
+                logger.error(f"Failed to save to audit: {e}")
+                return False
+
+    def fetch_pending_raw_jobs(self, limit: int = 100) -> List[RawJob]:
+        """Fetches jobs that are 'pending' and need processing."""
+        with SessionLocal() as session:
+            try:
+                statement = select(RawJobDB).where(RawJobDB.status == "pending").limit(limit)
+                results = session.execute(statement).scalars().all()
+                
+                jobs = []
+                for row in results:
+                    jobs.append(RawJob(
+                        id=row.id,
+                        url=row.url,
+                        title=row.title,
+                        company=row.company,
+                        location=row.location,
+                        full_json_dump=json.dumps(row.full_json_dump) if row.full_json_dump else "{}",
+                        status=row.status,
+                        extraction_method=row.extraction_method,
+                        raw_markdown=row.raw_markdown,
+                        retry_count=row.retry_count,
+                        created_at=row.created_at.strftime("%Y-%m-%d %H:%M:%S") if row.created_at else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    ))
+                return jobs
+            except Exception as e:
+                logger.error(f"Error fetching pending raw jobs: {e}")
+                return []
+
+    def update_job_status(self, job_id: int, status: str, retry_increment: bool = False) -> bool:
+        """Updates the status of a raw job."""
+        with SessionLocal() as session:
+            try:
+                job = session.get(RawJobDB, job_id)
+                if job:
+                    job.status = status
+                    if retry_increment:
+                        job.retry_count += 1
+                    session.commit()
+                    return True
+                return False
+            except Exception as e:
+                session.rollback()
+                logger.error(f"Failed to update job status: {e}")
                 return False
 
     def fetch_unparsed_jobs(self, limit: int = 100) -> List[RawJob]:
@@ -149,6 +225,10 @@ class JobRepository:
                         company=row.company,
                         location=row.location,
                         full_json_dump=json.dumps(row.full_json_dump) if row.full_json_dump else "{}",
+                        status=row.status,
+                        extraction_method=row.extraction_method,
+                        raw_markdown=row.raw_markdown,
+                        retry_count=row.retry_count,
                         created_at=row.created_at.strftime("%Y-%m-%d %H:%M:%S") if row.created_at else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     ))
                 return jobs
@@ -258,6 +338,83 @@ class JobRepository:
             logger.error(f"Failed to search job by criteria: {e}")
             return []
             
+    def search_jobs_by_similarity(
+        self,
+        embedding: List[float],
+        limit: int = 5
+    ) -> List[Dict[str, Any]]:
+        """
+        Tool meant specifically for the AI agent to search jobs by vector similarity.
+        Uses pgvector for Cosine Similarity search.
+        """
+        try:
+            with SessionLocal() as session:
+                # pgvector cosine similarity operator <=>
+                statement = (
+                    select(CleanJobDB)
+                    .order_by(CleanJobDB.embedding.op('<=>')(embedding))
+                    .limit(limit)
+                )
+                
+                result = session.execute(statement).scalars().all()
+                
+                mapped_jobs = []
+                for job in result:
+                    mapped_jobs.append({
+                        "title": job.standardized_title or "Unknown",
+                        "level": job.job_level or "Unknown",
+                        "company": job.raw_job.company if job.raw_job else "Unknown",
+                        "cities": list(job.cities) if job.cities else [],
+                        "experience_required_years": job.experience,
+                        "salary_range": f"{job.salary_min or '?'} - {job.salary_max or '?'} {job.currency}",
+                        "url": job.raw_job.url if job.raw_job else "#",
+                        "match_score": 1 # Placeholder for score calculation if needed
+                    })
+                return mapped_jobs
+        except Exception as e:
+            logger.error(f"Failed to search jobs by similarity: {e}")
+            return []
+
+    def get_user_profile(self, user_id: str) -> Optional[Dict[str, Any]]:
+        with SessionLocal() as session:
+            try:
+                statement = select(UserProfileDB).where(UserProfileDB.user_id == user_id)
+                profile = session.execute(statement).scalar_one_or_none()
+                if profile:
+                    return {
+                        "user_id": profile.user_id,
+                        "resume_text": profile.resume_text,
+                        "resume_embedding": profile.resume_embedding
+                    }
+                return None
+            except Exception as e:
+                logger.error(f"Failed to get user profile: {e}")
+                return None
+
+    def save_user_profile(self, user_id: str, resume_text: str, embedding: List[float]) -> bool:
+        with SessionLocal() as session:
+            try:
+                statement = select(UserProfileDB).where(UserProfileDB.user_id == user_id)
+                profile = session.execute(statement).scalar_one_or_none()
+                
+                if profile:
+                    profile.resume_text = resume_text
+                    profile.resume_embedding = embedding
+                else:
+                    profile = UserProfileDB(
+                        user_id=user_id,
+                        resume_text=resume_text,
+                        resume_embedding=embedding
+                    )
+                    session.add(profile)
+                
+                session.commit()
+                return True
+            except Exception as e:
+                session.rollback()
+                logger.error(f"Failed to save user profile: {e}")
+                return False
+            
 
     @staticmethod
     def normalize_url(url: str) -> str:
@@ -330,7 +487,32 @@ class MemoryRepository:
                 session.rollback()
                 logger.error("Failed save messages to ChatMessageDB", error=str(e))
 
-        def get_user_sessions(self, user_id: str) -> List[dict]:
-            with SessionLocal() as session:
-                try:
-                    statement
+    def get_user_sessions(self, user_id: str) -> List[dict]:
+        with SessionLocal() as session:
+            try:
+                statement = select(ChatSessionDB).where(ChatSessionDB.user_id == user_id)
+                chat_sessions = session.execute(statement).scalars().all()
+                return [
+                    {
+                        "session_id": s.id,
+                        "created_at": s.created_at.isoformat() if s.created_at else None,
+                    }
+                    for s in chat_sessions
+                ]
+            except Exception as e:
+                logger.error("Failed to get_user_sessions", error=str(e))
+                raise
+
+    def delete_session(self, session_id: str) -> bool:
+        from sqlalchemy import delete
+        with SessionLocal() as session:
+            try:
+                statement = delete(ChatSessionDB).where(ChatSessionDB.id == session_id)
+                session.execute(statement)
+                session.commit()
+                return True
+            except Exception as e:
+                session.rollback()
+                logger.error("delete_session failed", error=str(e))
+                raise
+

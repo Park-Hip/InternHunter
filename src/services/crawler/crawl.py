@@ -16,7 +16,7 @@ from tenacity import (
     wait_exponential,
 )
 
-from src.config import settings
+from src.config.settings import settings
 from src.infrastructure.db.repository import JobRepository
 from src.infrastructure.logging import get_logger, configure_logging, bind_context, clear_context
 from src.services.crawler.crawl_config import (
@@ -35,10 +35,12 @@ RETRY_EXCEPTIONS = (ConnectionError, OSError, asyncio.TimeoutError, TimeoutError
 
 class Crawler:
     def __init__(self):
-        self.fetch_link_url = settings.URL
+        self.fetch_link_url = settings.DS_URL
 
-    async def _arun_with_retry(self, crawler, url, config, max_attempts=3):
+    async def _arun_with_retry(self, crawler, url, config, max_attempts=None):
         """Call crawler.arun with exponential backoff. Raises after max_attempts on network/IO errors."""
+        if max_attempts is None:
+            max_attempts = settings.config_yaml.get("crawler", {}).get("max_retries", 3)
         async for attempt in AsyncRetrying(
             stop=stop_after_attempt(max_attempts),
             wait=wait_exponential(multiplier=1, min=4, max=60),
@@ -125,69 +127,78 @@ class Crawler:
                 logger.error("Network/crawl failed", url=url, error=result.error_message)
                 return None
 
-            data = json.loads(result.extracted_content)
+            # 1. Try CSS extraction
+            data = None
+            if result.extracted_content:
+                try:
+                    data = json.loads(result.extracted_content)
+                    if isinstance(data, list) and data:
+                        data = data[0]
+                except Exception:
+                    data = None
 
-            is_empty = not data or (isinstance(data, list) and not data)
-            missing_critical = False
-
-            if isinstance(data, list) and data:
-                data = data[0]
-            if not isinstance(data, dict):
-                logger.warning("Extract failed", url=url, failure_reason="non_dict_payload")
-                return None
-
-            critical_fields = ['title', 'info']
-            for key in critical_fields:
-                if not data.get(key):
-                    logger.error("Missing critical field", field=key, url=url)
-                    missing_critical = True
-
-            if is_empty or missing_critical:
-                # Distinguish block/captcha vs selector/layout failure for easier debugging
+            # Check if CSS extraction was successful and high quality
+            is_valid_css = (
+                isinstance(data, dict) and 
+                data.get('title') and 
+                data.get('info') and 
+                len(str(data.get('info'))) > 200
+            )
+            
+            if is_valid_css:
+                logger.info("CSS extraction successful", url=url)
+                title = data.get('title', '').strip()
+                company = data.get('company', '').strip()
+                return {
+                    "url": url,
+                    "title": title,
+                    "company": company,
+                    "location": data.get('location', '').strip(),
+                    "full_json_dump": data,
+                    "extraction_method": "css",
+                    "status": "pending"
+                }
+            else:
+                # 2. Fallback to RAW Markdown
+                logger.warning("CSS extraction failed/poor quality, using RAW fallback", url=url)
+                
+                # Check for blocking
                 html = (result.html or "")
-                failure_reason = (
-                    "block"
-                    if ("Verify you are human" in html or "Just a moment" in html)
-                    else ("selector_empty" if is_empty else "missing_fields")
-                )
-                logger.warning(
-                    "Extraction failed",
-                    url=url,
-                    failure_reason=failure_reason,
-                    is_empty=is_empty,
-                    missing_critical=missing_critical
-                )
-
-                safe_id = hashlib.md5(url.encode()).hexdigest()
-                os.makedirs("errors", exist_ok=True)
-
-                if result.screenshot:
-                    img_path = f"errors/error_{safe_id}.png"
-                    with open(img_path, "wb") as f:
-                        f.write(base64.b64decode(result.screenshot))
-                    logger.info("Error screenshot saved", path=img_path)
-
-                html_path = f"errors/error_{safe_id}.html"
-                with open(html_path, "w", encoding="utf-8") as f:
-                    f.write(result.html)
-
-                return None
-
-            title = data.get('title')
-            company = data.get('company')
-
-            if title:
-                title = title.strip()
-            if company:
-                company = company.strip()
-
-            logger.info("Job extracted", title=title, company=company, url=url)
-
-            data['url'] = url
-            return data
+                is_blocked = "Verify you are human" in html or "Just a moment" in html
+                
+                return {
+                    "url": url,
+                    "title": "Unknown (RAW)",
+                    "company": "Unknown (RAW)",
+                    "location": "Unknown",
+                    "raw_markdown": result.markdown_v2.raw_markdown if result.markdown_v2 else result.markdown,
+                    "extraction_method": "raw",
+                    "status": "blocked" if is_blocked else "pending",
+                    "screenshot": result.screenshot,
+                    "html": result.html,
+                    "full_json_dump": {"error": "CSS extraction failed", "is_blocked": is_blocked}
+                }
 
         except Exception as e:
             logger.error("Extraction error", url=url, error=str(e), exc_info=True)
+            return None
+
+        except Exception as e:
+            logger.error("Extraction error", url=url, error=str(e), exc_info=True)
+            return None
+
+    def _save_screenshot(self, screenshot_b64: str | None, url: str) -> str | None:
+        if not screenshot_b64:
+            return None
+        try:
+            safe_id = hashlib.md5(url.encode()).hexdigest()
+            os.makedirs("errors", exist_ok=True)
+            img_path = f"errors/error_{safe_id}_{int(time.time())}.png"
+            with open(img_path, "wb") as f:
+                f.write(base64.b64decode(screenshot_b64))
+            return img_path
+        except Exception as e:
+            logger.warning("Failed to save screenshot", error=str(e))
             return None
 
     async def crawl_jobs(self, new_links, run_id: str) -> None:
@@ -242,19 +253,37 @@ class Crawler:
                         "title": job_data.get("title"),
                         "company": job_data.get("company"),
                         "location": job_data.get("location"),
-                        "full_json_dump": job_data # Store the entire scraped dict as JSON
+                        "full_json_dump": job_data.get("full_json_dump"),
+                        "status": job_data.get("status", "pending"),
+                        "extraction_method": job_data.get("extraction_method", "css"),
+                        "raw_markdown": job_data.get("raw_markdown")
                     }
 
                     if repo.save_raw_job(job_to_save):
                         saved_count += 1
+                        
+                        # Handle immediate audit if blocked
+                        if job_data.get("status") == "blocked":
+                             repo.save_to_audit({
+                                 "url": link_record["url"],
+                                 "error_type": "BOT_DETECTED",
+                                 "error_message": "Blocked by captcha/verification",
+                                 "screenshot_path": self._save_screenshot(job_data.get("screenshot"), link_record["url"]),
+                                 "html_content": job_data.get("html")
+                             })
                     else:
                         failed_count += 1
                         logger.warning("Database save failed", phase="extract", url=link_record["url"], status="db_fail")
 
                 else:
                     failed_count += 1
-                    logger.info("Extraction failed, cooling down", phase="extract", url=link_record["url"], status="extract_fail", cooldown_seconds=30)
-                    await asyncio.sleep(30)
+                    logger.info("Extraction failed completely", phase="extract", url=link_record["url"], status="extract_fail")
+                    # If it totally failed (result.success=False), add to audit
+                    repo.save_to_audit({
+                        "url": link_record["url"],
+                        "error_type": "CRAWL_FAILED",
+                        "error_message": "Crawler returned result.success=False after retries"
+                    })
 
         duration_sec = time.monotonic() - start_time
         logger.info(

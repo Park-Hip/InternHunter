@@ -1,7 +1,7 @@
 import json
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker, make_transient
-from src.config import settings
+from src.config.settings import settings
 from src.infrastructure.db.models import Base, RawJobDB, CleanJobDB
 
 def run():

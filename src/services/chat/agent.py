@@ -9,6 +9,8 @@ from src.infrastructure.logging import get_logger
 from src.services.chat.tool_registry import get_all_tool_schemas, execute_tool
 from src.core.models.chat import ChatResponse, ToolCallInfo, Message, ChatRequest
 from src.infrastructure.llm.agent_provider import AgentLLMClient
+from src.config.settings import settings
+from src.services.chat import tools # Trigger registration
 
 logger = get_logger(__name__)
 load_dotenv()
@@ -27,8 +29,10 @@ except ImportError:
 
 def run_chat_agent(
         request: ChatRequest, 
-        max_iteration: int = 5
+        max_iteration: int = None
     ) -> ChatResponse:
+    if max_iteration is None:
+        max_iteration = settings.config_yaml.get("agent", {}).get("max_iterations", 5)
     memory = ChatMemory(session_id=request.session_id)
     llm = AgentLLMClient()
 
@@ -37,13 +41,9 @@ def run_chat_agent(
         try:
             SYSTEM_PROMPT = mlflow.genai.load_prompt("prompts:/agent_system@production").template
         except Exception:
-            _mlflow_available = False 
-    
-    if not _mlflow_available:
-        from src.config import settings
-        prompt_path = settings.BASE_DIR / "src" / "infrastructure" / "llm" / "prompts" / "agent_system.txt"
-        with open(prompt_path, "r", encoding="utf-8") as f:
-            SYSTEM_PROMPT = f.read()
+            SYSTEM_PROMPT = settings.get_prompt("agent_system")
+    else:
+        SYSTEM_PROMPT = settings.get_prompt("agent_system")
     
     old_messages = memory.load()
     user_message = [Message(

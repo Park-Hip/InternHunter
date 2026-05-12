@@ -1,6 +1,6 @@
 import argparse
 import sys
-from src.config import settings
+from src.config.settings import settings
 from src.infrastructure.logging import get_logger, configure_logging
 
 logger = get_logger(__name__)
@@ -25,6 +25,11 @@ def main():
     # All Command
     all_parser = subparsers.add_parser("all", help="Run full integrated pipeline (Init + Crawl + Process)")
     all_parser.add_argument("--limit", type=int, default=10, help="Number of jobs to process in the LLM phase")
+
+    # Serve Command
+    serve_parser = subparsers.add_parser("serve", help="Run the FastAPI chat server")
+    serve_parser.add_argument("--host", type=str, default="0.0.0.0", help="Host IP")
+    serve_parser.add_argument("--port", type=int, default=8000, help="Port")
 
     args = parser.parse_args()
 
@@ -53,6 +58,27 @@ def main():
         from src.run_pipeline import run_full_pipeline
         logger.info("Starting full integrated pipeline")
         asyncio.run(run_full_pipeline(limit=args.limit))
+    
+    elif args.command == "serve":
+        import uvicorn
+        from fastapi import FastAPI
+        from fastapi.middleware.cors import CORSMiddleware
+        from src.infrastructure.api.routes.chat_routes import router as chat_router
+        
+        app = FastAPI(title="Job Finder API", version="1.0.0")
+        
+        # Add CORS middleware to allow frontend requests
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+        
+        app.include_router(chat_router)
+        logger.info("Starting API server", host=args.host, port=args.port)
+        uvicorn.run(app, host=args.host, port=args.port)
     
     else:
         parser.print_help()

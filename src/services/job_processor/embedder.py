@@ -4,7 +4,7 @@ from tenacity import wait_exponential, retry, stop_after_attempt, retry_if_excep
 from typing import List
 from langdetect import detect
 
-from src.config import settings
+from src.config.settings import settings
 from src.infrastructure.logging import get_logger
 from src.infrastructure.llm.router import llm_router
 
@@ -23,7 +23,7 @@ class Embedder:
         self.router = llm_router
 
     @retry(
-        stop=stop_after_attempt(settings.MAX_RETRIES),
+        stop=stop_after_attempt(settings.config_yaml.get("crawler", {}).get("max_retries", 3)),
         wait=wait_exponential(multiplier=1, min=4, max=60),
         retry=retry_if_exception_type(Exception)
     )

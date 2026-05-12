@@ -4,7 +4,7 @@ from src.infrastructure.llm.providers import GeminiClient, GroqClient
 from src.infrastructure.llm.base import LLMProvider
 from src.core.models import ProcessedJob, RawJob
 from src.infrastructure.logging import get_logger
-from src.config import settings
+from src.config.settings import settings
 
 logger = get_logger(__name__)
 

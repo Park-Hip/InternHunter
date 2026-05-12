@@ -3,7 +3,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 
 from src.infrastructure.llm.providers import GroqClient
 from src.services.chat.tool_registry import get_all_tool_schemas
-from src.config import settings
+from src.config.settings import settings
 from src.infrastructure.logging import get_logger
 from src.core.models.chat import AgentResponse, Message
 
@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 class AgentLLMClient(GroqClient) :
     @retry(
-        stop=stop_after_attempt(settings.MAX_RETRIES),
+        stop=stop_after_attempt(settings.config_yaml.get("crawler", {}).get("max_retries", 3)),
         wait=wait_exponential(multiplier=1, min=4, max=60),
         retry=retry_if_exception_type(Exception)
     )

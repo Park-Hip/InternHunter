@@ -10,6 +10,13 @@ class RawJob(BaseModel):
     company: Optional[str] = None
     location: Optional[str] = None
     full_json_dump: str  
+    
+    # New production fields
+    status: str = "pending"
+    extraction_method: str = "css"
+    raw_markdown: Optional[str] = None
+    retry_count: int = 0
+
     created_at: Optional[str] = None 
 
 

@@ -14,7 +14,7 @@ from typing import List
 import logging
 
 
-from src.config import settings
+from src.config.settings import settings
 
 
 def get_processors(log_format: str) -> List[Processor]:
@@ -53,8 +53,9 @@ def configure_logging() -> None:
     Call this once at application startup (e.g., in main.py).
     """
     
-    log_format = settings.LOG_FORMAT.lower()
-    log_level = settings.LOG_LEVEL.upper()
+    log_cfg = settings.config_yaml.get("logging", {})
+    log_format = log_cfg.get("format", "console").lower()
+    log_level = log_cfg.get("level", "INFO").upper()
     
     # Configure standard library logging for output
     logging.basicConfig(

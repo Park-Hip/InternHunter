@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from typing import Any
 
 from src.infrastructure.logging import get_logger, configure_logging
-from src.config import settings
+from src.config.settings import settings
 
 logger = get_logger(__name__)
 

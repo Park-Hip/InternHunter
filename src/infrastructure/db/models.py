@@ -17,10 +17,26 @@ class RawJobDB(Base):
     location = Column(String) 
 
     full_json_dump = Column(JSON)
+    
+    # New production-grade fields
+    status = Column(String, default="pending") # pending, validated, failed, completed
+    extraction_method = Column(String, default="css") # css, raw
+    raw_markdown = Column(Text, nullable=True)
+    retry_count = Column(Integer, default=0)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     clean_job = relationship("CleanJobDB", back_populates="raw_job", uselist=False, cascade="all, delete-orphan")
+
+class AuditJobDB(Base):
+    __tablename__ = 'audit_jobs'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    url = Column(String, nullable=False)
+    error_type = Column(String) # BOT_DETECTED, SELECTOR_MISSING, LLM_INCOMPLETE, VALIDATION_FAILED
+    error_message = Column(Text)
+    screenshot_path = Column(String, nullable=True)
+    html_content = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class CleanJobDB(Base):
     __tablename__ = "clean_jobs"
@@ -75,3 +91,12 @@ class ChatMessageDB(Base):
     tokens_used = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     session = relationship("ChatSessionDB", back_populates="messages")
+
+class UserProfileDB(Base):
+    __tablename__ = 'user_profiles'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String, unique=True, index=True, nullable=False)
+    resume_text = Column(Text)
+    resume_embedding = Column(Vector(768))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

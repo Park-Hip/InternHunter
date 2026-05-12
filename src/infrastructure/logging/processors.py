@@ -8,7 +8,7 @@ import traceback
 from typing import Any, Dict
 from structlog.types import EventDict, WrappedLogger
 
-from src.config import settings
+from src.config.settings import settings
 
 
 def add_app_context(
