@@ -1,2 +1,8 @@
-"""Resume namespace for future migrated profile and matching code."""
+from .matching import MatchResumeArgs, UploadResumeArgs, execute_match_resume, execute_upload_resume
 
+__all__ = [
+    "MatchResumeArgs",
+    "UploadResumeArgs",
+    "execute_match_resume",
+    "execute_upload_resume",
+]
