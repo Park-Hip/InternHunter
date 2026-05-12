@@ -16,9 +16,11 @@ Current fixtures:
 - `negotiable_salary.extracted.json`
 - `multiple_locations.html`
 - `multiple_locations.extracted.json`
+- `internship_fresher.html`
+- `internship_fresher.extracted.json`
+- `blocked_or_empty.html`
+- `blocked_or_empty.expected_failure.json`
 
 Planned additions:
-- internship/fresher
 - expired/deadline edge case
 - malformed page
-- blocked/empty content

@@ -26,7 +26,7 @@ def assert_required_payload_fields(payload: dict) -> None:
 def assert_jobprocessor_success_fields(job: ProcessedJob | LLMJobProcess) -> None:
     assert job.standardized_title
     assert job.description
-    assert job.is_internship is False
+    assert isinstance(job.is_internship, bool)
     assert job.cities
     assert job.tech_stack
     assert job.domain_knowledge
@@ -43,6 +43,20 @@ def assert_location_policy(job: ProcessedJob | LLMJobProcess, fixture_name: str)
     assert job.cities
     if fixture_name == "multiple_locations":
         assert len(job.cities) >= 2
+
+
+def test_blocked_or_empty_fixture_is_expected_failure():
+    failure_path = FIXTURE_DIR / "blocked_or_empty.expected_failure.json"
+    payload = json.loads(failure_path.read_text(encoding="utf-8"))
+
+    assert payload["fixture_name"] == "blocked_or_empty"
+    assert payload["expected_valid"] is False
+    assert payload["expected_failure_reason"] == "blocked_or_empty_content"
+    assert payload["required_missing_fields"] == ["standardized_title", "description"]
+
+    blocked_html = (FIXTURE_DIR / "blocked_or_empty.html").read_text(encoding="utf-8")
+    assert "Verify you are human" in blocked_html
+    assert "Access Denied" in blocked_html
 
 
 @pytest.mark.parametrize(
@@ -92,6 +106,19 @@ def assert_location_policy(job: ProcessedJob | LLMJobProcess, fixture_name: str)
                 "is_salary_negotiable": False,
             },
         ),
+        (
+            "internship_fresher",
+            {
+                "standardized_title": "Python Intern",
+                "description_prefix": "This TopCV-like page represents an internship or fresher role.",
+                "salary_min": None,
+                "salary_max": None,
+                "currency": None,
+                "is_salary_negotiable": False,
+                "is_internship": True,
+                "job_level": "Intern",
+            },
+        ),
     ],
 )
 def test_topcv_fixture_matches_current_job_contract(fixture_name, expectations):
@@ -106,10 +133,16 @@ def test_topcv_fixture_matches_current_job_contract(fixture_name, expectations):
 
     assert_jobprocessor_success_fields(structured)
     assert_jobprocessor_success_fields(typed)
+    assert structured.is_internship is expectations.get("is_internship", structured.is_internship)
+    assert typed.is_internship is expectations.get("is_internship", typed.is_internship)
     assert_salary_policy(structured, expectations)
     assert_salary_policy(typed, expectations)
     assert_location_policy(structured, fixture_name)
     assert_location_policy(typed, fixture_name)
+
+    if fixture_name == "internship_fresher":
+        assert structured.job_level == expectations["job_level"]
+        assert typed.job_level == expectations["job_level"]
 
     assert structured.standardized_title == expectations["standardized_title"]
     assert structured.description.startswith(expectations["description_prefix"])
