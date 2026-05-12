@@ -88,3 +88,5 @@ async def test_extract_single_job_marks_blocked_or_empty_content_as_blocked(mock
     assert result.extraction_method == "raw"
     assert result.raw_markdown is not None
     assert "Verify you are human" in result.html
+    assert result.full_json_dump["is_blocked"] is True
+    assert result.full_json_dump["blocked_reason"] == "blocked_or_empty_content"

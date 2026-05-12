@@ -237,6 +237,11 @@ class Crawler:
                 
                 html = (result.html or "")
                 is_blocked = "Verify you are human" in html or "Just a moment" in html
+                blocked_reason = None
+                if is_blocked:
+                    blocked_reason = "blocked_or_empty_content"
+                elif not data:
+                    blocked_reason = "empty_or_unparseable_css_content"
                 
                 return ExtractionResult(
                     url=url,
@@ -248,7 +253,11 @@ class Crawler:
                     status="blocked" if is_blocked else "pending",
                     screenshot=result.screenshot,
                     html=result.html,
-                    full_json_dump={"error": "CSS extraction failed", "is_blocked": is_blocked}
+                    full_json_dump={
+                        "error": "CSS extraction failed",
+                        "is_blocked": is_blocked,
+                        "blocked_reason": blocked_reason,
+                    }
                 )
 
         except Exception as e:
