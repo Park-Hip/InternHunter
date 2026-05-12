@@ -16,16 +16,5 @@ services:
       timeout: 5s
       retries: 5
 
-  etl_worker:
-    build: .
-    container_name: job_finder_etl_worker
-    depends_on:
-      db:
-        condition: service_healthy
-    env_file:
-      - .env
-    # To run Playwright headless correctly, it needs some shared memory
-    shm_size: '2gb'
-
 volumes:
   postgres_data:

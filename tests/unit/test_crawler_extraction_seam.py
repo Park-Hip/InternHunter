@@ -16,8 +16,7 @@ class MockCrawlResult:
         self.error_message = None
         self.extracted_content = extracted_content
         self.html = html
-        self.markdown = markdown
-        self.markdown_v2 = SimpleNamespace(raw_markdown=markdown)
+        self.markdown = SimpleNamespace(raw_markdown=markdown)
         self.screenshot = None
 
 
@@ -34,7 +33,9 @@ async def test_extract_single_job_returns_pending_raw_extraction_for_normal_topc
             "experience": "2 years",
             "info": (
                 "This is a representative TopCV-like job detail page used for fixture-based extraction tests. "
-                "It includes responsibilities, requirements, and benefits sections."
+                "It includes responsibilities, requirements, and benefits sections. "
+                "The content is intentionally long enough to satisfy the crawler's CSS quality gate. "
+                "Additional detail ensures the info field is clearly non-trivial and representative."
             ),
         }
     ])

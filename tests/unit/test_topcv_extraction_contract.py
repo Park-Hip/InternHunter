@@ -23,9 +23,17 @@ def assert_required_payload_fields(payload: dict) -> None:
     assert not missing_fields, f"Missing required payload fields: {missing_fields}"
 
 
-def assert_jobprocessor_success_fields(job: ProcessedJob | LLMJobProcess) -> None:
+def assert_processed_job_success_fields(job: ProcessedJob) -> None:
     assert job.standardized_title
     assert job.description
+    assert isinstance(job.is_internship, bool)
+    assert job.cities
+    assert job.tech_stack
+    assert job.domain_knowledge
+
+
+def assert_llm_job_process_fields(job: LLMJobProcess) -> None:
+    assert job.standardized_title
     assert isinstance(job.is_internship, bool)
     assert job.cities
     assert job.tech_stack
@@ -150,8 +158,8 @@ def test_topcv_fixture_matches_current_job_contract(fixture_name, expectations):
     structured = ProcessedJob(**payload)
     typed = LLMJobProcess(**payload)
 
-    assert_jobprocessor_success_fields(structured)
-    assert_jobprocessor_success_fields(typed)
+    assert_processed_job_success_fields(structured)
+    assert_llm_job_process_fields(typed)
     assert structured.is_internship is expectations.get("is_internship", structured.is_internship)
     assert typed.is_internship is expectations.get("is_internship", typed.is_internship)
     assert_salary_policy(structured, expectations)

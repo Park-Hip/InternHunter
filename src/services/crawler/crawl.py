@@ -37,6 +37,21 @@ logger = get_logger(__name__)
 RETRY_EXCEPTIONS = (ConnectionError, OSError, asyncio.TimeoutError, TimeoutError)
 
 
+def _extract_raw_markdown(result) -> str | None:
+    """Compatibility helper for crawl4ai markdown result shapes."""
+    markdown_result = getattr(result, "markdown", None)
+    if markdown_result is None:
+        markdown_result = getattr(result, "markdown_v2", None)
+
+    if markdown_result is None:
+        return None
+
+    if isinstance(markdown_result, str):
+        return markdown_result
+
+    return getattr(markdown_result, "raw_markdown", None)
+
+
 class Crawler:
     def __init__(self):
         self.search_urls = settings.search_urls
@@ -248,7 +263,7 @@ class Crawler:
                     title="Unknown (RAW)",
                     company="Unknown (RAW)",
                     location="Unknown",
-                    raw_markdown=result.markdown_v2.raw_markdown if result.markdown_v2 else result.markdown,
+                    raw_markdown=_extract_raw_markdown(result),
                     extraction_method="raw",
                     status="blocked" if is_blocked else "pending",
                     screenshot=result.screenshot,
