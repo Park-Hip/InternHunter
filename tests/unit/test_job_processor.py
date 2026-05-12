@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from src.internhunter.extraction.job_processor import JobProcessor
 from src.infrastructure.db.repositories.etl import ETLRepository
-from src.infrastructure.db.models import RawJobDB
+from src.infrastructure.db.models import RawJobDB, AuditJobDB
 from src.core.models import ProcessedJob
 
 
@@ -24,6 +24,10 @@ def processor(mock_gemini_client):
 def load_processed_job_fixture(name: str) -> ProcessedJob:
     payload = json.loads((FIXTURE_DIR / f"{name}.extracted.json").read_text(encoding="utf-8"))
     return ProcessedJob(**payload)
+
+
+def get_latest_audit_row(test_db_session):
+    return test_db_session.query(AuditJobDB).order_by(AuditJobDB.id.desc()).first()
 
 @pytest.mark.asyncio
 async def test_process_jobs_success(test_db_session, repo, processor, mocker):
@@ -128,7 +132,8 @@ async def test_process_jobs_validation_fails(test_db_session, repo, processor, m
     })
     
     # Force validator to fail
-    mocker.patch("src.internhunter.extraction.validator.JobValidator.is_valid", return_value=(False, "Heuristic Failed"))
+    validator_reason = "Heuristic check failed: text too short or lacks job keywords."
+    mocker.patch("src.internhunter.extraction.validator.JobValidator.is_valid", return_value=(False, validator_reason))
     
     # 2. Act
     success, fail = await processor.process_jobs(limit=10)
@@ -142,3 +147,55 @@ async def test_process_jobs_validation_fails(test_db_session, repo, processor, m
     # if not is_valid: ... repo.update_job_status(job.id, "invalid") -> wait, the actual code says "failed". Let's check status.
     raw_job = test_db_session.query(RawJobDB).filter_by(url="https://example.com/job/bad").first()
     assert raw_job.status == "failed"
+
+    audit_row = get_latest_audit_row(test_db_session)
+    assert audit_row is not None
+    assert audit_row.error_type == "VALIDATION_FAILED"
+    assert validator_reason in audit_row.error_message
+
+
+@pytest.mark.asyncio
+async def test_process_jobs_llm_incomplete_failure_is_audited(test_db_session, repo, processor, mocker):
+    repo.save_raw_job({
+        "url": "https://example.com/job/llm-incomplete",
+        "raw_markdown": "This is a dummy job description containing over 300 characters. " * 10,
+        "status": "pending",
+    })
+
+    mocker.patch("src.internhunter.extraction.validator.JobValidator.is_valid", return_value=(True, ""))
+    mocker.patch(
+        "src.internhunter.extraction.job_processor.llm_router.process_with_fallback",
+        return_value=ProcessedJob(
+            standardized_title="",
+            job_level="Mid",
+            is_internship=False,
+            cities=["Hanoi"],
+            experience=2.0,
+            min_gpa=None,
+            english_requirement=None,
+            salary_min=None,
+            salary_max=None,
+            currency="VND",
+            is_salary_negotiable=False,
+            tech_stack=["Python"],
+            technical_competencies=["Build APIs"],
+            domain_knowledge=["Web Development"],
+            description="",
+            requirement="Python, APIs, testing",
+            benefit="Flexible work",
+        ),
+    )
+    mocker.patch("src.internhunter.embeddings.embedder.Embedder.generate_embedding", return_value=[0.1] * 768)
+
+    success, fail = await processor.process_jobs(limit=10)
+
+    assert success == 0
+    assert fail == 1
+
+    raw_job = test_db_session.query(RawJobDB).filter_by(url="https://example.com/job/llm-incomplete").first()
+    assert raw_job.status == "failed"
+
+    audit_row = get_latest_audit_row(test_db_session)
+    assert audit_row is not None
+    assert audit_row.error_type == "LLM_INCOMPLETE"
+    assert "Missing critical fields (title/description) in LLM output" in audit_row.error_message
