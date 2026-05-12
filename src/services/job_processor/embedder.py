@@ -5,8 +5,8 @@ from langdetect import detect
 
 from src.config.settings import settings
 from src.infrastructure.logging import get_logger
-from src.infrastructure.llm.router import llm_router
-from src.infrastructure.llm.providers import GEMINI_RETRY_EXCEPTIONS
+from src.internhunter.llm.router import llm_router
+from src.internhunter.llm.providers import GEMINI_RETRY_EXCEPTIONS
 
 logger = get_logger(__name__)
 

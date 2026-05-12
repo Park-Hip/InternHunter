@@ -1,7 +1,7 @@
 import re
 import json
 from typing import Tuple
-from src.infrastructure.llm.providers import GeminiClient
+from src.internhunter.llm.providers import GeminiClient
 from src.config.settings import settings
 from src.infrastructure.logging import get_logger
 
