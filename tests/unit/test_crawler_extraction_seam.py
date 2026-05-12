@@ -59,3 +59,32 @@ async def test_extract_single_job_returns_pending_raw_extraction_for_normal_topc
     assert result.location
     assert result.full_json_dump is not None
     assert result.raw_markdown is None
+
+
+@pytest.mark.asyncio
+async def test_extract_single_job_marks_blocked_or_empty_content_as_blocked(mocker):
+    html = (FIXTURE_DIR / "blocked_or_empty.html").read_text(encoding="utf-8")
+    blocked_metadata = json.loads((FIXTURE_DIR / "blocked_or_empty.expected_failure.json").read_text(encoding="utf-8"))
+    blocked_markdown = "Verify you are human. Access denied."
+
+    mock_result = MockCrawlResult(
+        html=html,
+        extracted_content="[]",
+        markdown=blocked_markdown,
+    )
+
+    mocker.patch("src.services.crawler.crawl.random.uniform", return_value=0)
+    mocker.patch.object(Crawler, "_arun_with_retry", return_value=mock_result)
+
+    crawler = Crawler()
+    result = await crawler.extract_single_job(SimpleNamespace(), "https://example.com/job/blocked")
+
+    assert blocked_metadata["fixture_name"] == "blocked_or_empty"
+    assert blocked_metadata["expected_valid"] is False
+    assert blocked_metadata["expected_failure_reason"] == "blocked_or_empty_content"
+    assert blocked_metadata["required_missing_fields"] == ["standardized_title", "description"]
+    assert result is not None
+    assert result.status == "blocked"
+    assert result.extraction_method == "raw"
+    assert result.raw_markdown is not None
+    assert "Verify you are human" in result.html
