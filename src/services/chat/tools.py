@@ -1,10 +1,7 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from pydantic import BaseModel, Field
-from langchain_community.utilities import SQLDatabase
-from langchain.chains import create_sql_query_chain
 from src.infrastructure.db.repositories.search import SearchRepository
 from src.infrastructure.db.repositories.chat import ChatRepository
-from src.infrastructure.db.session import engine
 from src.infrastructure.llm.router import llm_router
 from src.services.chat.tool_registry import register_tool
 from src.services.job_processor.embedder import Embedder
@@ -14,7 +11,6 @@ logger = get_logger(__name__)
 search_repo = SearchRepository()
 chat_repo = ChatRepository()
 embedder = Embedder()
-db = SQLDatabase(engine)
 
 # --- Text-to-SQL Tool ---
 
@@ -28,6 +24,12 @@ class SQLSearchArgs(BaseModel):
 )
 def execute_sql_search(query: str) -> str:
     try:
+        from langchain.chains import create_sql_query_chain
+        from langchain_community.utilities import SQLDatabase
+        from src.internhunter.storage.session import engine
+
+        db = SQLDatabase(engine)
+
         # We use the router's primary LLM to generate the SQL
         llm = llm_router.primary_provider.llm
         chain = create_sql_query_chain(llm, db)

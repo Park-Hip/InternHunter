@@ -24,9 +24,8 @@ Do these in order:
 4. Add temporary compatibility imports where needed so old imports still resolve.
 5. Add a minimal test that imports the new foundation modules.
 6. Verify the current commands still start:
-   - `uv run python src/main.py init-db`
-   - `uv run python src/main.py crawl`
    - `uv run python src/run_pipeline.py --limit 10`
+   - `uv run python src/scripts/run_production_v2.py`
 
 Exact file order:
 - `src/internhunter/config/settings.py`
@@ -56,15 +55,17 @@ Exact file order:
 Do these in order:
 1. Decide whether `src/flows/ingestion_flow.py` or `src/infrastructure/prefect/flows.py` is canonical.
 2. Keep one flow as the entry point and mark the other as legacy.
-3. Move CLI wrappers only after the flow boundary is settled.
-4. Preserve existing command names.
+3. Remove the old user-facing CLI entry point only after the supported flow paths are documented.
+4. Preserve the supported command surface by keeping `src/run_pipeline.py`, the Prefect flows, and scripts that are still used.
 
 Exact file order:
 - `src/flows/ingestion_flow.py`
 - `src/infrastructure/prefect/tasks.py`
 - `src/infrastructure/prefect/flows.py`
 - `src/run_pipeline.py`
-- `src/main.py`
+
+Note:
+- `src/main.py` was intentionally removed later in the refactor and is no longer a required runtime entry point.
 
 ### Phase 4: Ingestion
 
@@ -165,16 +166,16 @@ Goal:
 
 Move next:
 - Prefect flow composition
-- CLI entry points that call the flows
+- supported runtime entrypoints that call the flows
 
 Target code:
 - `src/flows/ingestion_flow.py`
 - `src/infrastructure/prefect/*`
 - `src/run_pipeline.py`
-- `src/main.py`
 
 Goal:
 - keep the pipeline entry points stable while removing duplication
+- `src/main.py` was intentionally removed and is no longer part of the supported runtime surface.
 
 ### Phase 4: Ingestion
 
@@ -281,6 +282,7 @@ Each step below should be small enough to review independently.
 8. Choose the canonical orchestration path and make the other one legacy.
 9. Move crawler config and crawler service behind the new package boundary.
 10. Move validator, processor, and embedder in that order, keeping behavior unchanged.
+11. Document the removal of `src/main.py` and update tests to cover the supported runtime entrypoints.
 
 ## Commit Rules
 

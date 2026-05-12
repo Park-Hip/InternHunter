@@ -2,9 +2,14 @@
 
 ## Current Paths
 
-- Local CLI entry points in `src/main.py`
 - Pipeline wrapper in `src/run_pipeline.py`
+- Canonical Prefect flows in `src/internhunter/orchestration/`
+- Maintenance scripts under `src/scripts/` when still used
 - Docker support via `Dockerfile` and `docker-compose.yml`
+
+## Removed Path
+
+- `src/main.py` was intentionally removed as a user-facing CLI entry point.
 
 ## Current Deployment Shape
 

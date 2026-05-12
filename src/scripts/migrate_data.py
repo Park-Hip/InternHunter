@@ -6,8 +6,8 @@ if __package__ in (None, ""):
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker, make_transient
-from internhunter.config.settings import settings
-from infrastructure.db.models import Base, RawJobDB, CleanJobDB
+from src.internhunter.config.settings import settings
+from src.infrastructure.db.models import Base, RawJobDB, CleanJobDB
 
 def run():
     print("Starting migration...")

@@ -19,12 +19,14 @@ This file describes what the code does today, not what it should do later.
 ## Known Commands
 
 - `uv run python src/run_pipeline.py --limit 10`
-- `uv run python src/main.py crawl`
-- `uv run python src/main.py process --limit 10`
-- `uv run python src/main.py init-db`
-- `uv run python src/main.py serve --host 0.0.0.0 --port 8000`
 - `uv run python src/scripts/upgrade_db.py`
+- `uv run python src/scripts/run_production_v2.py`
 - `docker-compose up -d`
+
+## Removed Entry Point
+
+- `src/main.py` was intentionally removed as a user-facing CLI entry point.
+- Supported runtime paths are now `src/run_pipeline.py`, canonical Prefect flows under `src/internhunter/orchestration/`, API entrypoints if present, and scripts under `src/scripts/` when they are still used.
 
 ## Known Modules and Files
 
@@ -32,8 +34,10 @@ This file describes what the code does today, not what it should do later.
 - `src/config/settings.yaml`
 - `src/config/prompts.yaml`
 - `src/flows/ingestion_flow.py`
+- `src/internhunter/orchestration/ingestion_flow.py`
+- `src/internhunter/orchestration/flows.py`
+- `src/internhunter/orchestration/tasks.py`
 - `src/run_pipeline.py`
-- `src/main.py`
 - `src/services/crawler/crawl.py`
 - `src/services/crawler/crawl_config.py`
 - `src/services/job_processor/job_processor.py`
@@ -59,6 +63,7 @@ This file describes what the code does today, not what it should do later.
 - TODO: verify from codebase, but `src/infrastructure/api/routes/chat_routes.py` imports `src.infrastructure.db.repository.MemoryRepository`, while the repo contains `src/infrastructure/db/repositories/`.
 - TODO: verify from codebase, but `src/services/chat/memory.py` has the same `MemoryRepository` import mismatch.
 - TODO: verify from codebase, but there are two orchestration paths: `src/flows/ingestion_flow.py` and `src/infrastructure/prefect/flows.py`.
+- `src/main.py` is intentionally removed; any docs or tests that still require it should be updated to the supported runtime entrypoints.
 - TODO: verify from codebase, but `Dockerfile` points to `src.scripts.deployment`, which is not present in the repo.
 - Search and resume matching exist mainly as repository and chat-tool code, not as dedicated API endpoints yet.
 - Test coverage is present, but it is still narrow and heavily mocked.

@@ -16,6 +16,7 @@ See also: [REFACTORING_ROADMAP.md](./REFACTORING_ROADMAP.md) for the recommended
 - Change one module at a time whenever possible.
 - Do not mix crawler, processor, DB, and API edits in one refactor unless the change is purely mechanical.
 - Keep orchestration changes separate from business-logic changes.
+- If the user-facing CLI is removed, document the supported entrypoints in docs and tests before the next phase.
 
 ## Move-Only Refactors
 

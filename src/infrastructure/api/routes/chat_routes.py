@@ -1,8 +1,8 @@
 from fastapi import HTTPException, APIRouter
 from src.core.models import ChatRequest, ChatResponse
 from src.services.chat.agent import run_chat_agent
-from src.infrastructure.db.repository import MemoryRepository
-from src.infrastructure.logging import get_logger
+from src.internhunter.common.logging import get_logger
+from src.internhunter.storage.repositories.chat import MemoryRepository
 
 
 logger = get_logger(__name__)

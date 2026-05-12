@@ -3,16 +3,16 @@
 Current scraper entry points:
 
 ```bash
-uv run python src/main.py crawl
+uv run python src/run_pipeline.py --limit 10
 ```
 
-Alternative direct entry point:
+If you need the crawler internals directly, import the canonical flow instead of a deleted CLI:
 
-```bash
-uv run python src/services/crawler/crawl.py
+```python
+from src.internhunter.orchestration.ingestion_flow import job_ingestion_flow
 ```
 
 ## Notes
 
-- The scraper discovers links first, then crawls detail pages.
+- The scraper discovers links first, then crawls detail pages through the orchestration flow.
 - It stores raw job rows and audit failures.

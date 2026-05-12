@@ -1,9 +1,3 @@
-"""
-Thin CLI wrapper around the Prefect ingestion flow.
-
-This is the ONLY entry point for running the pipeline.
-All orchestration logic lives in src/flows/ingestion_flow.py.
-"""
 import asyncio
 import argparse
 import os
@@ -12,7 +6,12 @@ import sys
 if __package__ in (None, ""):
     sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from flows.ingestion_flow import job_ingestion_flow
+from src.internhunter.orchestration.ingestion_flow import job_ingestion_flow
+
+
+async def run_full_pipeline(limit: int = 10):
+    """Compatibility alias for the current ingestion flow."""
+    await job_ingestion_flow(limit=limit)
 
 
 if __name__ == "__main__":

@@ -138,5 +138,9 @@ class ChatRepository:
                 logger.error("delete_session failed", error=str(e))
                 raise
 
+# TODO: verify whether chat history persistence should remain under a "memory" name
+# or be renamed everywhere to "chat repository" in a later refactor.
+MemoryRepository = ChatRepository
 
-__all__ = ["ChatRepository"]
+
+__all__ = ["ChatRepository", "MemoryRepository"]
