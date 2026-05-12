@@ -1,7 +1,13 @@
+import os
+import sys
+
+if __package__ in (None, ""):
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
 import asyncio
-from src.infrastructure.prefect.flows import run_production_pipeline
-from src.config.settings import settings
-from src.infrastructure.logging import configure_logging
+from infrastructure.prefect.flows import run_production_pipeline
+from internhunter.config.settings import settings
+from internhunter.common.logging import configure_logging
 
 async def main():
     configure_logging()

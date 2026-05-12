@@ -1,7 +1,13 @@
+import os
+import sys
+
+if __package__ in (None, ""):
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
 import sqlalchemy as sa
-from src.config.settings import settings
-from src.infrastructure.db.session import engine
-from src.infrastructure.db.models import Base
+from internhunter.config.settings import settings
+from infrastructure.db.session import engine
+from infrastructure.db.models import Base
 
 def upgrade():
     print("Upgrading database...")

@@ -34,6 +34,10 @@ def test_db_session(engine, monkeypatch):
     monkeypatch.setattr("src.infrastructure.db.repositories.etl.SessionLocal", TestSessionLocal)
     monkeypatch.setattr("src.infrastructure.db.repositories.search.SessionLocal", TestSessionLocal)
     monkeypatch.setattr("src.infrastructure.db.repositories.chat.SessionLocal", TestSessionLocal)
+    monkeypatch.setattr("src.internhunter.storage.repositories.etl.SessionLocal", TestSessionLocal)
+    monkeypatch.setattr("src.internhunter.storage.repositories.search.SessionLocal", TestSessionLocal)
+    monkeypatch.setattr("src.internhunter.storage.repositories.chat.SessionLocal", TestSessionLocal)
+    monkeypatch.setattr("src.internhunter.storage.session.SessionLocal", TestSessionLocal)
     
     session = TestSessionLocal()
     yield session

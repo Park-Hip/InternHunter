@@ -1,6 +1,12 @@
-from src.infrastructure.db.repositories.etl import ETLRepository
-from src.infrastructure.db.session import SessionLocal
-from src.infrastructure.db.models import AuditJobDB, RawJobDB, CleanJobDB
+import os
+import sys
+
+if __package__ in (None, ""):
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
+from infrastructure.db.repositories.etl import ETLRepository
+from infrastructure.db.session import SessionLocal
+from infrastructure.db.models import AuditJobDB, RawJobDB, CleanJobDB
 
 def check():
     repo = ETLRepository()

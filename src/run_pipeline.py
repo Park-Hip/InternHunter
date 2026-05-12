@@ -6,7 +6,13 @@ All orchestration logic lives in src/flows/ingestion_flow.py.
 """
 import asyncio
 import argparse
-from src.flows.ingestion_flow import job_ingestion_flow
+import os
+import sys
+
+if __package__ in (None, ""):
+    sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
+from flows.ingestion_flow import job_ingestion_flow
 
 
 if __name__ == "__main__":

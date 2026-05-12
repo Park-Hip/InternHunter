@@ -1,7 +1,12 @@
 import argparse
+import os
 import sys
-from src.config.settings import settings
-from src.infrastructure.logging import get_logger, configure_logging
+
+if __package__ in (None, ""):
+    sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
+from internhunter.config.settings import settings
+from internhunter.common.logging import get_logger, configure_logging
 
 logger = get_logger(__name__)
 
@@ -34,20 +39,20 @@ def main():
     args = parser.parse_args()
 
     if args.command == "process":
-        from src.services.job_processor.job_processor import run_pipeline
+        from services.job_processor.job_processor import run_pipeline
         logger.info("Starting AI processing pipeline", version="v2", limit=args.limit)
         run_pipeline(limit=args.limit)
     
     elif args.command == "crawl":
         import asyncio
         import uuid
-        from src.services.crawler.crawl import run_crawler_pipeline
+        from services.crawler.crawl import run_crawler_pipeline
         run_id = str(uuid.uuid4())[:8]
         logger.info("Starting crawler pipeline", run_id=run_id)
         asyncio.run(run_crawler_pipeline(run_id))
     
     elif args.command == "init-db":
-        from src.infrastructure.db.repositories.etl import ETLRepository
+        from infrastructure.db.repositories.etl import ETLRepository
         logger.info("Initializing database schema")
         repo = ETLRepository()
         repo.create_tables()
@@ -55,7 +60,7 @@ def main():
 
     elif args.command == "all":
         import asyncio
-        from src.run_pipeline import run_full_pipeline
+        from run_pipeline import run_full_pipeline
         logger.info("Starting full integrated pipeline")
         asyncio.run(run_full_pipeline(limit=args.limit))
     
@@ -63,7 +68,7 @@ def main():
         import uvicorn
         from fastapi import FastAPI
         from fastapi.middleware.cors import CORSMiddleware
-        from src.infrastructure.api.routes.chat_routes import router as chat_router
+        from infrastructure.api.routes.chat_routes import router as chat_router
         
         app = FastAPI(title="Job Finder API", version="1.0.0")
         

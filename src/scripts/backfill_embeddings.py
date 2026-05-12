@@ -1,11 +1,15 @@
-
+import os
+import sys
 import time
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from src.infrastructure.db.session import SessionLocal
-from src.infrastructure.db.models import CleanJobDB
-from src.services.job_processor.embedder import embedder
-from src.infrastructure.logging import get_logger
+
+if __package__ in (None, ""):
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+from infrastructure.db.session import SessionLocal
+from infrastructure.db.models import CleanJobDB
+from services.job_processor.embedder import embedder
+from internhunter.common.logging import get_logger
 
 logger = get_logger(__name__)
 

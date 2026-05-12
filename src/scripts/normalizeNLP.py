@@ -1,6 +1,11 @@
+import os
+import sys
 import json
-from src.infrastructure.db.models import CleanJobDB
-from src.infrastructure.db.session import SessionLocal
+
+if __package__ in (None, ""):
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+from infrastructure.db.models import CleanJobDB
+from infrastructure.db.session import SessionLocal
 from sqlalchemy import select
 
 def run_normalization():

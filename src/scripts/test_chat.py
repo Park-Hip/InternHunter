@@ -1,6 +1,12 @@
-from src.services.chat.agent import run_chat_agent
-from src.services.chat.memory import ChatMemory
-from src.infrastructure.logging import configure_logging
+import os
+import sys
+
+if __package__ in (None, ""):
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
+from services.chat.agent import run_chat_agent
+from services.chat.memory import ChatMemory
+from internhunter.common.logging import configure_logging
 
 memory = ChatMemory()
 
