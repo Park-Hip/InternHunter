@@ -5,7 +5,7 @@ from prefect import task
 from src.internhunter.storage.repositories.etl import ETLRepository
 from src.internhunter.common.logging import get_logger
 from src.internhunter.ingestion.crawl import Crawler
-from src.services.job_processor.job_processor import JobProcessor
+from src.internhunter.extraction.job_processor import JobProcessor
 
 logger = get_logger(__name__)
 

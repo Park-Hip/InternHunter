@@ -7,6 +7,7 @@ from src.infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
 
+
 class JobValidator:
     def __init__(self):
         # Use lite model for cheap validation — configurable via settings.yaml

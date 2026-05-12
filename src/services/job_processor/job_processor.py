@@ -9,6 +9,7 @@ from src.infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
 
+
 class JobProcessor():
 
     def __init__(self):
