@@ -90,3 +90,29 @@ async def test_extract_single_job_marks_blocked_or_empty_content_as_blocked(mock
     assert "Verify you are human" in result.html
     assert result.full_json_dump["is_blocked"] is True
     assert result.full_json_dump["blocked_reason"] == "blocked_or_empty_content"
+
+
+@pytest.mark.asyncio
+async def test_extract_single_job_uses_raw_fallback_for_unparseable_css_content(mocker):
+    html = (FIXTURE_DIR / "normal_job.html").read_text(encoding="utf-8")
+    raw_markdown = "This is representative markdown for a TopCV job detail page with usable fallback text."
+
+    mock_result = MockCrawlResult(
+        html=html,
+        extracted_content="[]",
+        markdown=raw_markdown,
+    )
+
+    mocker.patch("src.services.crawler.crawl.random.uniform", return_value=0)
+    mocker.patch.object(Crawler, "_arun_with_retry", return_value=mock_result)
+
+    crawler = Crawler()
+    result = await crawler.extract_single_job(SimpleNamespace(), "https://example.com/job/raw-fallback")
+
+    assert result is not None
+    assert result.status == "pending"
+    assert result.extraction_method == "raw"
+    assert result.raw_markdown is not None
+    assert result.raw_markdown == raw_markdown
+    assert result.full_json_dump["is_blocked"] is False
+    assert result.full_json_dump["blocked_reason"] == "empty_or_unparseable_css_content"

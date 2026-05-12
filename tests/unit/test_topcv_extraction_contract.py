@@ -59,6 +59,25 @@ def test_blocked_or_empty_fixture_is_expected_failure():
     assert "Access Denied" in blocked_html
 
 
+def test_malformed_page_fixture_is_expected_failure():
+    failure_path = FIXTURE_DIR / "malformed_page.expected_failure.json"
+    payload = json.loads(failure_path.read_text(encoding="utf-8"))
+
+    assert payload["fixture_name"] == "malformed_page"
+    assert payload["expected_valid"] is False
+    assert payload["expected_failure_reason"] == "malformed_or_incomplete_content"
+    assert payload["required_missing_fields"] == [
+        "standardized_title",
+        "cities",
+        "tech_stack",
+        "domain_knowledge",
+    ]
+
+    malformed_html = (FIXTURE_DIR / "malformed_page.html").read_text(encoding="utf-8")
+    assert "Malformed Job Page" in malformed_html
+    assert "missing key structured content" in malformed_html
+
+
 @pytest.mark.parametrize(
     ("fixture_name", "expectations"),
     [
