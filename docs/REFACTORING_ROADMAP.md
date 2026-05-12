@@ -291,3 +291,9 @@ Each step below should be small enough to review independently.
 - If a commit changes imports, make sure the old import path still works or has a documented replacement.
 - If a commit changes runtime behavior, add or update a test in the same commit.
 - Stop immediately if a commit would require a schema change without a migration path.
+
+## Known Test Debt Before Phase 4
+
+- `tests/integration/test_ingestion_flow.py` currently requires a live PostgreSQL instance or better DB isolation.
+- `tests/unit/test_job_processor.py` needs async updates because `JobProcessor.process_jobs()` is now async.
+- These failures are not blockers for Phase 4 ingestion-boundary work, but must be fixed before declaring the full refactor stable.

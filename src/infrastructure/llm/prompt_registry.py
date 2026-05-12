@@ -1,6 +1,4 @@
 import mlflow
-import sys
-import os
 from dotenv import load_dotenv
 from typing import Any
 
@@ -13,8 +11,6 @@ load_dotenv()
 
 mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
 mlflow.set_experiment(settings.MLFLOW_EXPERIMENT)
-
-from mlflow.tracking import MlflowClient
 
 PROMPTS_DIR = settings.BASE_DIR / "src" / "infrastructure" / "llm" / "prompts"
 

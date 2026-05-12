@@ -6,7 +6,7 @@ from prefect import flow, task
 from src.core.models.fetch_result import FetchOutcome, FetchStatus
 from src.internhunter.common.logging import configure_logging, get_logger
 from src.internhunter.storage.repositories.etl import ETLRepository
-from src.services.crawler.crawl import Crawler
+from src.internhunter.ingestion.crawl import Crawler
 from src.services.job_processor.job_processor import JobProcessor
 
 logger = get_logger(__name__)

@@ -4,14 +4,20 @@ from pydantic import BaseModel
 
 _TOOL_REGISTRY = {}
 
+
 def _type_to_json_schema_type(py_type):
     type_str = str(py_type)
 
-    if py_type == int: return "integer"
-    if py_type == float: return "number"
-    if py_type == bool: return "boolean"
-    if "List" in type_str: return "array"
+    if py_type is int:
+        return "integer"
+    if py_type is float:
+        return "number"
+    if py_type is bool:
+        return "boolean"
+    if "List" in type_str:
+        return "array"
     return "string"
+
 
 def register_tool(name: str, description: str, args_schema: type[BaseModel] = None):
     def decorator(func):
@@ -57,12 +63,14 @@ def register_tool(name: str, description: str, args_schema: type[BaseModel] = No
         return func
     return decorator
 
+
 def get_all_tool_schemas() -> list[dict]:
     tool_schemas = []
     for key, value in _TOOL_REGISTRY.items():
         tool_schemas.append(value['schema'])
 
     return tool_schemas
+
 
 def execute_tool(tool_name: str, arguments: dict):
     if tool_name not in _TOOL_REGISTRY:

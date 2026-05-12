@@ -4,7 +4,7 @@ from prefect import task
 
 from src.internhunter.storage.repositories.etl import ETLRepository
 from src.internhunter.common.logging import get_logger
-from src.services.crawler.crawl import Crawler
+from src.internhunter.ingestion.crawl import Crawler
 from src.services.job_processor.job_processor import JobProcessor
 
 logger = get_logger(__name__)
@@ -22,7 +22,7 @@ async def fetch_job_links_task(run_id: str, url: str) -> List[dict]:
 async def acquire_job_task(url: str, run_id: str) -> bool:
     """Acquires a single job (CSS or RAW fallback) and saves to staging."""
     from crawl4ai import AsyncWebCrawler
-    from src.services.crawler.crawl_config import browser_config
+    from src.internhunter.ingestion.crawl_config import browser_config
     from crawl4ai.browser_adapter import UndetectedAdapter
 
     repo = ETLRepository()
