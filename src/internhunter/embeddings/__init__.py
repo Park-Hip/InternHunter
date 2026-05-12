@@ -1,2 +1,3 @@
-"""Embeddings namespace for future migrated vector code."""
+from .embedder import Embedder, embedder
 
+__all__ = ["Embedder", "embedder"]

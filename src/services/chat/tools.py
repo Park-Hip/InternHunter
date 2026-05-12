@@ -4,7 +4,7 @@ from src.infrastructure.db.repositories.search import SearchRepository
 from src.infrastructure.db.repositories.chat import ChatRepository
 from src.infrastructure.llm.router import llm_router
 from src.services.chat.tool_registry import register_tool
-from src.services.job_processor.embedder import Embedder
+from src.internhunter.embeddings.embedder import Embedder
 from src.infrastructure.logging import get_logger
 
 logger = get_logger(__name__)

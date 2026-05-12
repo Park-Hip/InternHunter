@@ -8,7 +8,7 @@ if __package__ in (None, ""):
 
 from src.infrastructure.db.session import SessionLocal
 from src.infrastructure.db.models import CleanJobDB
-from src.services.job_processor.embedder import embedder
+from src.internhunter.embeddings.embedder import embedder
 from src.internhunter.common.logging import get_logger
 
 logger = get_logger(__name__)

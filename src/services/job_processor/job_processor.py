@@ -3,7 +3,7 @@ import time
 
 from src.infrastructure.llm.router import llm_router
 from src.infrastructure.db.repositories.etl import ETLRepository
-from src.services.job_processor.embedder import Embedder
+from src.internhunter.embeddings.embedder import Embedder
 from src.config.settings import settings
 from src.infrastructure.logging import get_logger
 
