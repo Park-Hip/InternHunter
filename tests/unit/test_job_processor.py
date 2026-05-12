@@ -1,8 +1,14 @@
+import json
+from pathlib import Path
+
 import pytest
 from src.internhunter.extraction.job_processor import JobProcessor
 from src.infrastructure.db.repositories.etl import ETLRepository
 from src.infrastructure.db.models import RawJobDB
 from src.core.models import ProcessedJob
+
+
+FIXTURE_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "topcv"
 
 @pytest.fixture
 def repo(test_db_session):
@@ -13,6 +19,11 @@ def processor(mock_gemini_client):
     # The processor uses the mocked Gemini client automatically 
     # thanks to the monkeypatching in the fixture.
     return JobProcessor()
+
+
+def load_processed_job_fixture(name: str) -> ProcessedJob:
+    payload = json.loads((FIXTURE_DIR / f"{name}.extracted.json").read_text(encoding="utf-8"))
+    return ProcessedJob(**payload)
 
 @pytest.mark.asyncio
 async def test_process_jobs_success(test_db_session, repo, processor, mocker):
@@ -71,6 +82,41 @@ async def test_process_jobs_success(test_db_session, repo, processor, mocker):
     assert clean_job.standardized_title == "Software Engineer Test"
     assert clean_job.job_level == "Mid"
     assert "Python" in clean_job.tech_stack
+
+
+@pytest.mark.asyncio
+async def test_process_jobs_saves_fixture_backed_processed_job(test_db_session, repo, processor, mocker):
+    repo.save_raw_job({
+        "url": "https://example.com/job/fixture-backed",
+        "title": "Raw Title",
+        "raw_markdown": "This is a dummy job description containing over 300 characters. " * 10,
+        "status": "pending",
+    })
+
+    structured_fixture = load_processed_job_fixture("normal_job")
+
+    mocker.patch("src.internhunter.extraction.validator.JobValidator.is_valid", return_value=(True, ""))
+    mocker.patch(
+        "src.internhunter.extraction.job_processor.llm_router.process_with_fallback",
+        return_value=structured_fixture,
+    )
+    mocker.patch("src.internhunter.embeddings.embedder.Embedder.generate_embedding", return_value=[0.1] * 768)
+
+    success_count, fail_count = await processor.process_jobs(limit=10)
+
+    assert success_count == 1
+    assert fail_count == 0
+
+    raw_job = test_db_session.query(RawJobDB).filter_by(url="https://example.com/job/fixture-backed").first()
+    assert raw_job.status == "completed"
+
+    clean_job = raw_job.clean_job
+    assert clean_job is not None
+    assert clean_job.standardized_title == structured_fixture.standardized_title
+    assert clean_job.description == structured_fixture.description
+    assert list(clean_job.cities) == structured_fixture.cities
+    assert list(clean_job.tech_stack) == structured_fixture.tech_stack
+    assert list(clean_job.domain_knowledge) == structured_fixture.domain_knowledge
 
 @pytest.mark.asyncio
 async def test_process_jobs_validation_fails(test_db_session, repo, processor, mocker):
