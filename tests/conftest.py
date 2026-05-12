@@ -87,6 +87,6 @@ def mock_gemini_client(monkeypatch, mock_llm_response):
         def get_model(self):
             return self.client
             
-    monkeypatch.setattr("src.services.job_processor.validator.GeminiClient", MockClient)
-    monkeypatch.setattr("src.infrastructure.llm.providers.GeminiClient", MockClient)
+    monkeypatch.setattr("src.internhunter.extraction.validator.GeminiClient", MockClient)
+    monkeypatch.setattr("src.internhunter.llm.providers.GeminiClient", MockClient)
     return MockClient

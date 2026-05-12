@@ -1,5 +1,5 @@
 import pytest
-from src.services.job_processor.job_processor import JobProcessor
+from src.internhunter.extraction.job_processor import JobProcessor
 from src.infrastructure.db.repositories.etl import ETLRepository
 from src.infrastructure.db.models import RawJobDB
 from src.core.models import ProcessedJob
@@ -25,14 +25,14 @@ async def test_process_jobs_success(test_db_session, repo, processor, mocker):
     })
     
     # Mock the Embedder since we don't want to make real API calls for embeddings
-    mocker.patch("src.services.job_processor.embedder.Embedder.generate_embedding", return_value=[0.1]*768)
+    mocker.patch("src.internhunter.embeddings.embedder.Embedder.generate_embedding", return_value=[0.1]*768)
     
     # Mock validator to pass
-    mocker.patch("src.services.job_processor.validator.JobValidator.is_valid", return_value=(True, ""))
+    mocker.patch("src.internhunter.extraction.validator.JobValidator.is_valid", return_value=(True, ""))
 
     # Mock the LLM routing/extraction step so this stays a unit test.
     mocker.patch(
-        "src.services.job_processor.job_processor.llm_router.process_with_fallback",
+        "src.internhunter.extraction.job_processor.llm_router.process_with_fallback",
         return_value=ProcessedJob(
             standardized_title="Software Engineer Test",
             job_level="Mid",
@@ -82,7 +82,7 @@ async def test_process_jobs_validation_fails(test_db_session, repo, processor, m
     })
     
     # Force validator to fail
-    mocker.patch("src.services.job_processor.validator.JobValidator.is_valid", return_value=(False, "Heuristic Failed"))
+    mocker.patch("src.internhunter.extraction.validator.JobValidator.is_valid", return_value=(False, "Heuristic Failed"))
     
     # 2. Act
     success, fail = await processor.process_jobs(limit=10)
