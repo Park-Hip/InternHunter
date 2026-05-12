@@ -1,2 +1,3 @@
-"""Search namespace for future migrated query code."""
+from .repository import SearchRepository
 
+__all__ = ["SearchRepository"]

@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from pydantic import BaseModel, Field
-from src.infrastructure.db.repositories.search import SearchRepository
+from src.internhunter.search.repository import SearchRepository
 from src.infrastructure.db.repositories.chat import ChatRepository
 from src.internhunter.llm.router import llm_router
 from src.services.chat.tool_registry import register_tool
