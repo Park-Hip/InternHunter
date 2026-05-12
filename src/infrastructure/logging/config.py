@@ -97,18 +97,32 @@ def bind_context(**kwargs) -> None:
     """
     Bind context variables that will be included in all subsequent logs.
     
-    Useful for adding request IDs, user IDs, etc. that should appear in all logs
-    within a request/session.
+    This is ADDITIVE — it merges new variables with existing context.
+    Use reset_context() if you need to clear everything first.
     
     Args:
         **kwargs: Context key-value pairs
         
     Example:
-        bind_context(request_id="abc-123", user_id=456)
-        logger.info("User action")  # Automatically includes request_id, user_id
+        bind_context(run_id="abc-123")
+        bind_context(phase="extract")  # run_id is preserved
+        logger.info("Action")  # Includes both run_id and phase
+    """
+    structlog.contextvars.bind_contextvars(**kwargs)
+
+
+def reset_context(**kwargs) -> None:
+    """
+    Clear ALL bound context variables, then optionally set new ones.
+    
+    Use this at the start of a new pipeline run to ensure a clean slate.
+    
+    Args:
+        **kwargs: Optional new context to bind after clearing.
     """
     structlog.contextvars.clear_contextvars()
-    structlog.contextvars.bind_contextvars(**kwargs)
+    if kwargs:
+        structlog.contextvars.bind_contextvars(**kwargs)
 
 
 def clear_context() -> None:

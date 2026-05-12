@@ -6,7 +6,7 @@ import base64
 import hashlib
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from tenacity import (
@@ -17,7 +17,10 @@ from tenacity import (
 )
 
 from src.config.settings import settings
-from src.infrastructure.db.repository import JobRepository
+from src.core.utils import normalize_url
+from src.core.models.fetch_result import FetchOutcome, FetchStatus
+from src.core.models.extraction_result import ExtractionResult
+from src.infrastructure.db.repositories.etl import ETLRepository
 from src.infrastructure.logging import get_logger, configure_logging, bind_context, clear_context
 from src.services.crawler.crawl_config import (
     browser_config,
@@ -33,9 +36,11 @@ logger = get_logger(__name__)
 # Retry on transient network/IO errors only (do not retry on block/captcha - those are in result)
 RETRY_EXCEPTIONS = (ConnectionError, OSError, asyncio.TimeoutError, TimeoutError)
 
+
 class Crawler:
     def __init__(self):
-        self.fetch_link_url = settings.DS_URL
+        self.search_urls = settings.search_urls
+        self.max_pages = settings.crawler.max_pages
 
     async def _arun_with_retry(self, crawler, url, config, max_attempts=None):
         """Call crawler.arun with exponential backoff. Raises after max_attempts on network/IO errors."""
@@ -50,73 +55,139 @@ class Crawler:
             with attempt:
                 return await crawler.arun(url=url, config=config)
 
-    @staticmethod
-    def normalize_url(url: str) -> str:
-        """Canonical URL for dedup (strip query/fragment and whitespace)."""
-        if not url or not isinstance(url, str):
-            return ""
-        return url.split("?")[0].split("#")[0].strip()
+    async def _fetch_single_page(self, crawler, url: str) -> tuple[list[dict], FetchStatus | None]:
+        """Fetch links from a single search result page.
+        
+        Returns:
+            (links, error_status) — links found on this page, and an error status if something went wrong.
+            If error_status is not None, the caller should stop pagination.
+        """
+        await asyncio.sleep(random.uniform(2, 4))
 
-    async def fetch_job_links(self, run_id: str) -> list[dict] | None:
-        """Fetches job URLs from the search page."""
+        try:
+            result = await self._arun_with_retry(crawler, url, fetch_link_run_config)
+        except Exception as e:
+            logger.error("Network error fetching page", phase="fetch_links", url=url, error=str(e))
+            return [], FetchStatus.NETWORK_FAIL
+
+        if not result.success:
+            logger.error("Crawl failed for page", phase="fetch_links", url=url, error=result.error_message)
+            return [], FetchStatus.NETWORK_FAIL
+
+        # Check for bot blocking
+        if "Verify you are human" in (result.html or "") or "Just a moment" in (result.html or ""):
+            logger.warning("Blocked by captcha/verification", phase="fetch_links", status="block", url=url)
+            return [], FetchStatus.BLOCKED
+
+        # Parse extracted content with guard
+        try:
+            data = json.loads(result.extracted_content or "[]")
+        except json.JSONDecodeError as e:
+            logger.error("Failed to parse extracted content", phase="fetch_links",
+                         error=str(e), content_preview=str(result.extracted_content)[:200])
+            return [], FetchStatus.PARSE_ERROR
+
+        if not isinstance(data, list) or not data:
+            logger.info("No links found on page", phase="fetch_links", url=url)
+            return [], None  # Empty page = end of pagination, not an error
+
+        # Normalize URLs
+        page_links = []
+        for item in data:
+            raw_url = item.get("url") or ""
+            normalized = normalize_url(raw_url)
+            if normalized:
+                page_links.append({
+                    "url": normalized,
+                    "scraped_at": datetime.now(timezone.utc).isoformat(),
+                    "source": "topcv"
+                })
+
+        return page_links, None
+
+    async def fetch_job_links(self, run_id: str) -> FetchOutcome:
+        """Fetches job URLs from all configured search pages with pagination.
+
+        Iterates through all search URLs (DS_URL, AIE_URL, etc.) and paginates
+        each one up to max_pages. Returns a typed FetchOutcome so the caller
+        can distinguish between blocked/error/empty/success states.
+        """
         bind_context(run_id=run_id)
+        logger.info("Fetch links phase starting", phase="fetch_links", status="start",
+                    search_urls=len(self.search_urls), max_pages=self.max_pages)
 
-        logger.info("Fetch links phase starting", phase="fetch_links", status="start")
+        all_links = []
+        total_pages_scraped = 0
+        last_error_status = None
 
         try:
             async with AsyncWebCrawler(config=browser_config) as crawler:
-                logger.info("Fetching job links", phase="fetch_links", url=self.fetch_link_url)
-                await asyncio.sleep(random.uniform(2, 4))
+                for base_url in self.search_urls:
+                    logger.info("Scraping search URL", phase="fetch_links", base_url=base_url)
 
-                result = await self._arun_with_retry(crawler, self.fetch_link_url, fetch_link_run_config)
+                    for page in range(1, self.max_pages + 1):
+                        # Build paginated URL
+                        page_url = f"{base_url}&page={page}" if page > 1 else base_url
+                        logger.info("Fetching page", phase="fetch_links", url=page_url, page=page)
 
-                if result.success:
-                    if "Verify you are human" in result.html or "Just a moment" in result.html:
-                        logger.warning("Blocked by captcha/verification", phase="fetch_links", status="block", url=self.fetch_link_url)
-                        return None
+                        page_links, error_status = await self._fetch_single_page(crawler, page_url)
 
-                    data = json.loads(result.extracted_content)
-                    logger.info("Jobs found", count=len(data))
+                        if error_status is not None:
+                            last_error_status = error_status
+                            logger.warning("Stopping pagination for URL", phase="fetch_links",
+                                           base_url=base_url, reason=error_status.value, page=page)
+                            break  # Stop paginating this URL, move to next
 
-                    formatted_links = []
-                    for item in data:
-                        raw_url = item.get("url") or ""
-                        normalized = self.normalize_url(raw_url)
-                        if normalized:
-                            formatted_links.append({
-                                "url": normalized,
-                                "scraped_at": datetime.now().isoformat(),
-                                "source": "topcv"
-                            })
+                        if not page_links:
+                            logger.info("No more results, stopping pagination", phase="fetch_links",
+                                        base_url=base_url, page=page)
+                            break  # Empty page = no more results
 
-                    repo = JobRepository()
-                    new_links = repo.filter_new_links(formatted_links)
+                        all_links.extend(page_links)
+                        total_pages_scraped += 1
+                        logger.info("Page scraped", phase="fetch_links", page=page,
+                                    links_on_page=len(page_links), total_so_far=len(all_links))
 
-                    logger.info(
-                        "Links filtered",
-                        phase="fetch_links",
-                        total=len(formatted_links),
-                        new=len(new_links)
-                    )
+            # Dedup against database
+            if not all_links:
+                status = last_error_status or FetchStatus.NO_NEW
+                logger.info("Fetch links completed with no links", phase="fetch_links",
+                            status=status.value, pages_scraped=total_pages_scraped)
+                return FetchOutcome(status=status, pages_scraped=total_pages_scraped)
 
-                    if not new_links:
-                        logger.info("Fetch links completed", phase="fetch_links", status="done", reason="no_new_jobs")
-                        return None
-                    
-                    return new_links
-                else:
-                    logger.error("Fetch links failed", phase="fetch_links", status="fail", error=result.error_message)
-                    return None
+            repo = ETLRepository()
+            new_links = repo.filter_new_links(all_links)
+
+            logger.info("Links filtered", phase="fetch_links",
+                        total_scraped=len(all_links), new=len(new_links),
+                        pages_scraped=total_pages_scraped)
+
+            if not new_links:
+                return FetchOutcome(
+                    status=FetchStatus.NO_NEW,
+                    total_scraped=len(all_links),
+                    pages_scraped=total_pages_scraped
+                )
+
+            return FetchOutcome(
+                status=FetchStatus.SUCCESS,
+                links=new_links,
+                total_scraped=len(all_links),
+                pages_scraped=total_pages_scraped
+            )
 
         except Exception as e:
-            logger.error("Fetch links exception", phase="fetch_links", status="error", error=str(e), exc_info=True)
-            return None
+            logger.error("Fetch links exception", phase="fetch_links", status="error",
+                         error=str(e), exc_info=True)
+            return FetchOutcome(status=FetchStatus.NETWORK_FAIL, error=str(e))
 
         finally:
             clear_context()
 
-    async def extract_single_job(self, crawler: AsyncWebCrawler, url: str) -> dict[str, Any] | None:
-        delay = random.uniform(10, 15)
+
+    async def extract_single_job(self, crawler: AsyncWebCrawler, url: str) -> ExtractionResult | None:
+        """Extract a single job page. Returns typed ExtractionResult or None on total failure."""
+        delay = random.uniform(settings.crawler.extract_delay_min, settings.crawler.extract_delay_max)
         logger.info("Waiting before extraction", delay_seconds=round(delay, 1), url=url)
         await asyncio.sleep(delay)
 
@@ -138,6 +209,7 @@ class Crawler:
                     data = None
 
             # Check if CSS extraction was successful and high quality
+            css_fields = ['title', 'company', 'salary', 'location', 'experience', 'info']
             is_valid_css = (
                 isinstance(data, dict) and 
                 data.get('title') and 
@@ -146,54 +218,52 @@ class Crawler:
             )
             
             if is_valid_css:
-                logger.info("CSS extraction successful", url=url)
-                title = data.get('title', '').strip()
-                company = data.get('company', '').strip()
-                return {
-                    "url": url,
-                    "title": title,
-                    "company": company,
-                    "location": data.get('location', '').strip(),
-                    "full_json_dump": data,
-                    "extraction_method": "css",
-                    "status": "pending"
-                }
+                found = [k for k in css_fields if data.get(k)]
+                missing = [k for k in css_fields if not data.get(k)]
+                logger.info("CSS extraction successful", url=url,
+                            fields_found=",".join(found), fields_missing=",".join(missing))
+                return ExtractionResult(
+                    url=url,
+                    title=data.get('title', '').strip(),
+                    company=data.get('company', '').strip(),
+                    location=data.get('location', '').strip(),
+                    full_json_dump=data,
+                    extraction_method="css",
+                    status="pending"
+                )
             else:
                 # 2. Fallback to RAW Markdown
                 logger.warning("CSS extraction failed/poor quality, using RAW fallback", url=url)
                 
-                # Check for blocking
                 html = (result.html or "")
                 is_blocked = "Verify you are human" in html or "Just a moment" in html
                 
-                return {
-                    "url": url,
-                    "title": "Unknown (RAW)",
-                    "company": "Unknown (RAW)",
-                    "location": "Unknown",
-                    "raw_markdown": result.markdown_v2.raw_markdown if result.markdown_v2 else result.markdown,
-                    "extraction_method": "raw",
-                    "status": "blocked" if is_blocked else "pending",
-                    "screenshot": result.screenshot,
-                    "html": result.html,
-                    "full_json_dump": {"error": "CSS extraction failed", "is_blocked": is_blocked}
-                }
-
-        except Exception as e:
-            logger.error("Extraction error", url=url, error=str(e), exc_info=True)
-            return None
+                return ExtractionResult(
+                    url=url,
+                    title="Unknown (RAW)",
+                    company="Unknown (RAW)",
+                    location="Unknown",
+                    raw_markdown=result.markdown_v2.raw_markdown if result.markdown_v2 else result.markdown,
+                    extraction_method="raw",
+                    status="blocked" if is_blocked else "pending",
+                    screenshot=result.screenshot,
+                    html=result.html,
+                    full_json_dump={"error": "CSS extraction failed", "is_blocked": is_blocked}
+                )
 
         except Exception as e:
             logger.error("Extraction error", url=url, error=str(e), exc_info=True)
             return None
 
     def _save_screenshot(self, screenshot_b64: str | None, url: str) -> str | None:
+        """Save a base64 screenshot to disk for debugging blocked pages."""
         if not screenshot_b64:
             return None
         try:
             safe_id = hashlib.md5(url.encode()).hexdigest()
-            os.makedirs("errors", exist_ok=True)
-            img_path = f"errors/error_{safe_id}_{int(time.time())}.png"
+            errors_dir = settings.BASE_DIR / "errors"
+            os.makedirs(errors_dir, exist_ok=True)
+            img_path = str(errors_dir / f"error_{safe_id}_{int(time.time())}.png")
             with open(img_path, "wb") as f:
                 f.write(base64.b64decode(screenshot_b64))
             return img_path
@@ -201,16 +271,21 @@ class Crawler:
             logger.warning("Failed to save screenshot", error=str(e))
             return None
 
-    async def crawl_jobs(self, new_links, run_id: str) -> None:
-        """"Crawl new_links fetched by fetch_job_links()"""
-
+    async def crawl_jobs(self, new_links, run_id: str) -> tuple[int, int]:
+        """Crawl new_links fetched by fetch_job_links().
+        
+        Returns:
+            (saved_count, failed_count) so the flow can record extraction telemetry.
+        """
         bind_context(run_id=run_id)
         if not new_links:
             logger.error("Extract phase skipped", phase="extract", status="skip", reason="no_links")
-            return
+            return 0, 0
 
-        repo = JobRepository()
+        repo = ETLRepository()
         raw_jobs_count = repo.get_raw_jobs_count()
+        # Defensive re-check: links may have been saved by a concurrent pipeline run
+        # between fetch_job_links() and crawl_jobs(). Safe to keep.
         remaining_links = repo.filter_new_links(new_links)
 
         new_links_count = len(new_links)
@@ -228,7 +303,7 @@ class Crawler:
 
         if not remaining_links:
             logger.info("Extract phase completed", phase="extract", status="done", reason="no_remaining_links")
-            return
+            return 0, 0
 
         start_time = time.monotonic()
         saved_count = 0
@@ -237,50 +312,38 @@ class Crawler:
         adapter = UndetectedAdapter()
         async with AsyncWebCrawler(config=browser_config, browser_adapter=adapter) as crawler:
             for i, link_record in enumerate(remaining_links):
+                url = link_record["url"]
                 logger.info(
                     "Processing job",
                     phase="extract",
                     progress=f"{i + 1}/{len(remaining_links)}",
-                    url=link_record["url"]
+                    url=url
                 )
 
-                job_data = await self.extract_single_job(crawler, link_record["url"])
+                extraction = await self.extract_single_job(crawler, url)
 
-                if job_data:
-                    # Prepare data for repository
-                    job_to_save = {
-                        "url": link_record["url"],
-                        "title": job_data.get("title"),
-                        "company": job_data.get("company"),
-                        "location": job_data.get("location"),
-                        "full_json_dump": job_data.get("full_json_dump"),
-                        "status": job_data.get("status", "pending"),
-                        "extraction_method": job_data.get("extraction_method", "css"),
-                        "raw_markdown": job_data.get("raw_markdown")
-                    }
-
-                    if repo.save_raw_job(job_to_save):
+                if extraction:
+                    if repo.save_raw_job(extraction.to_save_dict()):
                         saved_count += 1
                         
                         # Handle immediate audit if blocked
-                        if job_data.get("status") == "blocked":
-                             repo.save_to_audit({
-                                 "url": link_record["url"],
-                                 "error_type": "BOT_DETECTED",
-                                 "error_message": "Blocked by captcha/verification",
-                                 "screenshot_path": self._save_screenshot(job_data.get("screenshot"), link_record["url"]),
-                                 "html_content": job_data.get("html")
-                             })
+                        if extraction.status == "blocked":
+                            repo.save_to_audit({
+                                "url": url,
+                                "error_type": "BOT_DETECTED",
+                                "error_message": "Blocked by captcha/verification",
+                                "screenshot_path": self._save_screenshot(extraction.screenshot, url),
+                                "html_content": extraction.html
+                            })
                     else:
                         failed_count += 1
-                        logger.warning("Database save failed", phase="extract", url=link_record["url"], status="db_fail")
+                        logger.warning("Database save failed", phase="extract", url=url, status="db_fail")
 
                 else:
                     failed_count += 1
-                    logger.info("Extraction failed completely", phase="extract", url=link_record["url"], status="extract_fail")
-                    # If it totally failed (result.success=False), add to audit
+                    logger.info("Extraction failed completely", phase="extract", url=url, status="extract_fail")
                     repo.save_to_audit({
-                        "url": link_record["url"],
+                        "url": url,
                         "error_type": "CRAWL_FAILED",
                         "error_message": "Crawler returned result.success=False after retries"
                     })
@@ -295,14 +358,15 @@ class Crawler:
             failed=failed_count,
             duration_sec=round(duration_sec, 1)
         )
+        return saved_count, failed_count
 
 
 async def run_crawler_pipeline(run_id: str):
     """Main pipeline entry point."""
     crawler = Crawler()
-    new_links = await crawler.fetch_job_links(run_id)
-    if new_links:
-        await crawler.crawl_jobs(new_links, run_id)
+    outcome = await crawler.fetch_job_links(run_id)
+    if outcome.is_success and outcome.links:
+        await crawler.crawl_jobs(outcome.links, run_id)
 
 
 if __name__ == "__main__":

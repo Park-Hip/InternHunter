@@ -10,7 +10,7 @@ from typing import Any, List
 from prefect import task
 
 from src.config.settings import settings
-from src.infrastructure.db.repository import JobRepository
+from src.infrastructure.db.repositories.etl import ETLRepository
 from src.infrastructure.logging import get_logger, bind_context
 from src.services.crawler.crawl import Crawler
 from src.services.job_processor.job_processor import JobProcessor
@@ -33,7 +33,7 @@ async def acquire_job_task(url: str, run_id: str) -> bool:
     from src.services.crawler.crawl_config import browser_config
     from crawl4ai.browser_adapter import UndetectedAdapter
     
-    repo = JobRepository()
+    repo = ETLRepository()
     crawler_service = Crawler()
     
     adapter = UndetectedAdapter()

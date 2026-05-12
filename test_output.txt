@@ -1,0 +1,243 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.3, pluggy-1.6.0 -- D:\Data_Science_Project\job_finder\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Data_Science_Project\job_finder
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-1.3.0, mock-3.15.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 8 items
+
+tests/integration/test_ingestion_flow.py::test_job_ingestion_flow FAILED [ 12%]
+tests/unit/test_etl_repository.py::test_save_raw_job PASSED              [ 25%]
+tests/unit/test_etl_repository.py::test_save_raw_job_duplicate_url PASSED [ 37%]
+tests/unit/test_etl_repository.py::test_filter_new_links FAILED          [ 50%]
+tests/unit/test_etl_repository.py::test_save_pipeline_run_summary PASSED [ 62%]
+tests/unit/test_etl_repository.py::test_save_parsed_job FAILED           [ 75%]
+tests/unit/test_job_processor.py::test_process_jobs_success FAILED       [ 87%]
+tests/unit/test_job_processor.py::test_process_jobs_validation_fails FAILED [100%]
+
+================================== FAILURES ===================================
+___________________________ test_job_ingestion_flow ___________________________
+
+test_db_session = <sqlalchemy.orm.session.Session object at 0x000001D827945370>
+mocker = <pytest_mock.plugin.MockerFixture object at 0x000001D827947710>
+mock_gemini_client = <class 'conftest.mock_gemini_client.<locals>.MockClient'>
+
+    @pytest.mark.asyncio
+    async def test_job_ingestion_flow(test_db_session, mocker, mock_gemini_client):
+        """Integration test for the entire ETL pipeline."""
+    
+        # 1. Setup Mocking for the Crawler
+        # We don't want to actually launch Playwright during our integration test.
+    
+        # Mock fetch_job_links to return 2 dummy links
+        mocker.patch(
+            "src.services.crawler.crawl.Crawler.fetch_job_links",
+            return_value=[
+                {"url": "https://example.com/job/flow1", "title": "Flow Job 1"},
+                {"url": "https://example.com/job/flow2", "title": "Flow Job 2"}
+            ]
+        )
+    
+        # Mock crawl_jobs to just insert the jobs directly into the database
+        # simulating a successful crawl.
+        async def mock_crawl_jobs(links, run_id):
+            from src.infrastructure.db.repositories.etl import ETLRepository
+            repo = ETLRepository()
+            for link in links:
+                repo.save_raw_job({
+                    "url": link["url"],
+                    "title": link["title"],
+                    "raw_markdown": "Integration test job content. " * 20,
+                    "status": "pending"
+                })
+    
+        mocker.patch("src.services.crawler.crawl.Crawler.crawl_jobs", side_effect=mock_crawl_jobs)
+    
+        # Mock embedder and validator heuristic
+        mocker.patch("src.services.job_processor.embedder.Embedder.generate_embedding", return_value=[0.5]*768)
+        mocker.patch("src.services.job_processor.validator.JobValidator.heuristic_check", return_value=True)
+    
+        # 2. Act: Execute the Prefect Flow
+        # The flow will fetch the 2 mocked links, crawl them (via our mock insert),
+        # process them (using the mock_gemini_client), and save telemetry.
+        await job_ingestion_flow(limit=10)
+    
+        # 3. Assert
+        # Verify that the Pipeline_Runs table registered the 2 acquired and 2 processed jobs.
+        pipeline_run = test_db_session.query(PipelineRunDB).order_by(PipelineRunDB.timestamp.desc()).first()
+    
+        assert pipeline_run is not None
+        assert pipeline_run.jobs_acquired == 2
+>       assert pipeline_run.jobs_processed == 2
+E       assert 0 == 2
+E        +  where 0 = <src.infrastructure.db.models.PipelineRunDB object at 0x000001D827B049B0>.jobs_processed
+
+tests\integration\test_ingestion_flow.py:57: AssertionError
+---------------------------- Captured stderr setup ----------------------------
+13:24:39.142 | INFO    | prefect - Starting temporary server on http://127.0.0.1:8296
+See https://docs.prefect.io/v3/concepts/server#how-to-guides for more information on running a dedicated Prefect server.
+----------------------------- Captured log setup ------------------------------
+INFO     prefect:server.py:907 Starting temporary server on http://127.0.0.1:8296
+See https://docs.prefect.io/v3/concepts/server#how-to-guides for more information on running a dedicated Prefect server.
+---------------------------- Captured stderr call -----------------------------
+13:24:47.471 | INFO    | prefect.engine - View at http://127.0.0.1:8296/runs/flow-run/993f1e30-ef51-45a8-a9df-714292992764
+13:24:47.490 | INFO    | Flow run 'festive-wyvern' - Beginning flow run 'festive-wyvern' for flow 'Job Ingestion Flow'
+13:24:47.494 | INFO    | Flow run 'festive-wyvern' - View at http://127.0.0.1:8296/runs/flow-run/993f1e30-ef51-45a8-a9df-714292992764
+13:24:47.624 | INFO    | Task run 'fetch_links_task-e25' - Finished in state Completed()
+13:24:47.629 | INFO    | Task run 'crawl_jobs_task-ac9' - Finished in state Completed()
+13:24:51.262 | WARNING | src.services.job_processor.validator - [2m2026-05-12T06:24:51.262089Z[0m [[33m[1mwarning  [0m] [1mLLM Validation rejected page  [0m [[0m[1m[34msrc.services.job_processor.validator[0m][0m [36mreason[0m=[35m'No reason provided'[0m
+13:24:51.262 | WARNING | src.services.job_processor.job_processor - [2m2026-05-12T06:24:51.262089Z[0m [[33m[1mwarning  [0m] [1mJob rejected by validator     [0m [[0m[1m[34msrc.services.job_processor.job_processor[0m][0m [36mreason[0m=[35m'No reason provided'[0m [36murl[0m=[35mhttps://example.com/job/flow1[0m
+13:24:54.265 | WARNING | src.services.job_processor.validator - [2m2026-05-12T06:24:54.265829Z[0m [[33m[1mwarning  [0m] [1mLLM Validation rejected page  [0m [[0m[1m[34msrc.services.job_processor.validator[0m][0m [36mreason[0m=[35m'No reason provided'[0m
+13:24:54.265 | WARNING | src.services.job_processor.job_processor - [2m2026-05-12T06:24:54.265829Z[0m [[33m[1mwarning  [0m] [1mJob rejected by validator     [0m [[0m[1m[34msrc.services.job_processor.job_processor[0m][0m [36mreason[0m=[35m'No reason provided'[0m [36murl[0m=[35mhttps://example.com/job/flow2[0m
+13:24:54.268 | INFO    | Task run 'process_jobs_task-b0c' - Finished in state Completed()
+13:24:54.286 | INFO    | Flow run 'festive-wyvern' - Finished in state Completed()
+------------------------------ Captured log call ------------------------------
+INFO     prefect.engine:flow_engine.py:1494 View at http://127.0.0.1:8296/runs/flow-run/993f1e30-ef51-45a8-a9df-714292992764
+INFO     prefect.flow_runs:flow_engine.py:1468 Beginning flow run 'festive-wyvern' for flow 'Job Ingestion Flow'
+INFO     prefect.flow_runs:flow_engine.py:1473 View at http://127.0.0.1:8296/runs/flow-run/993f1e30-ef51-45a8-a9df-714292992764
+INFO     prefect.task_runs:task_engine.py:404 Finished in state Completed()
+INFO     prefect.task_runs:task_engine.py:404 Finished in state Completed()
+WARNING  src.services.job_processor.validator:validator.py:65 [2m2026-05-12T06:24:51.262089Z[0m [[33m[1mwarning  [0m] [1mLLM Validation rejected page  [0m [[0m[1m[34msrc.services.job_processor.validator[0m][0m [36mreason[0m=[35m'No reason provided'[0m
+WARNING  src.services.job_processor.job_processor:job_processor.py:53 [2m2026-05-12T06:24:51.262089Z[0m [[33m[1mwarning  [0m] [1mJob rejected by validator     [0m [[0m[1m[34msrc.services.job_processor.job_processor[0m][0m [36mreason[0m=[35m'No reason provided'[0m [36murl[0m=[35mhttps://example.com/job/flow1[0m
+WARNING  src.services.job_processor.validator:validator.py:65 [2m2026-05-12T06:24:54.265829Z[0m [[33m[1mwarning  [0m] [1mLLM Validation rejected page  [0m [[0m[1m[34msrc.services.job_processor.validator[0m][0m [36mreason[0m=[35m'No reason provided'[0m
+WARNING  src.services.job_processor.job_processor:job_processor.py:53 [2m2026-05-12T06:24:54.265829Z[0m [[33m[1mwarning  [0m] [1mJob rejected by validator     [0m [[0m[1m[34msrc.services.job_processor.job_processor[0m][0m [36mreason[0m=[35m'No reason provided'[0m [36murl[0m=[35mhttps://example.com/job/flow2[0m
+INFO     prefect.task_runs:task_engine.py:404 Finished in state Completed()
+INFO     prefect.flow_runs:flow_engine.py:1554 Finished in state Completed()
+____________________________ test_filter_new_links ____________________________
+
+test_db_session = <sqlalchemy.orm.session.Session object at 0x000001D827AAFF80>
+repo = <src.infrastructure.db.repositories.etl.ETLRepository object at 0x000001D827B04D70>
+
+    def test_filter_new_links(test_db_session, repo):
+        repo.save_raw_job({"url": "https://example.com/job/1?sba=1", "title": "Saved"})
+    
+        unfiltered = [
+            {"url": "https://example.com/job/1?ref=test"}, # Canonical is same, should be filtered
+            {"url": "https://example.com/job/2"},          # New, should be kept
+        ]
+    
+        new_links = repo.filter_new_links(unfiltered)
+    
+>       assert len(new_links) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len([{'url': 'https://example.com/job/1'}, {'url': 'https://example.com/job/2'}])
+
+tests\unit\test_etl_repository.py:52: AssertionError
+____________________________ test_save_parsed_job _____________________________
+
+test_db_session = <sqlalchemy.orm.session.Session object at 0x000001D827B072C0>
+repo = <src.infrastructure.db.repositories.etl.ETLRepository object at 0x000001D81ACD5AF0>
+
+    def test_save_parsed_job(test_db_session, repo):
+        # Setup raw job first (foreign key requirement)
+        repo.save_raw_job({"url": "https://example.com/job/parsed", "title": "Raw"})
+        raw_job = test_db_session.query(RawJobDB).filter_by(url="https://example.com/job/parsed").first()
+    
+>       parsed = ProcessedJob(
+            standardized_title="Clean Title",
+            job_level="Junior",
+            is_internship=False,
+            description="Clean desc",
+            requirement="None",
+            benefit="None",
+            cities=["HCM"],
+            tech_stack=["Python"]
+        )
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for ProcessedJob
+E       domain_knowledge
+E         Field required [type=missing, input_value={'standardized_title': 'C...tech_stack': ['Python']}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.12/v/missing
+
+tests\unit\test_etl_repository.py:76: ValidationError
+__________________________ test_process_jobs_success __________________________
+
+test_db_session = <sqlalchemy.orm.session.Session object at 0x000001D827C79700>
+repo = <src.infrastructure.db.repositories.etl.ETLRepository object at 0x000001D827C78590>
+processor = <src.services.job_processor.job_processor.JobProcessor object at 0x000001D827C79A30>
+mocker = <pytest_mock.plugin.MockerFixture object at 0x000001D827B07410>
+
+    def test_process_jobs_success(test_db_session, repo, processor, mocker):
+        # 1. Setup: Insert a pending raw job
+        repo.save_raw_job({
+            "url": "https://example.com/job/process-me",
+            "title": "Raw Title",
+            "raw_markdown": "This is a dummy job description containing over 300 characters. " * 10, # Pass heuristic
+            "status": "pending"
+        })
+    
+        # Mock the Embedder since we don't want to make real API calls for embeddings
+        mocker.patch("src.services.job_processor.embedder.Embedder.generate_embedding", return_value=[0.1]*768)
+    
+        # Mock validator heuristic to always pass for this test, just in case
+        mocker.patch("src.services.job_processor.validator.JobValidator.heuristic_check", return_value=True)
+    
+        # 2. Act: Run processing
+        success_count, fail_count = processor.process_jobs(limit=10)
+    
+        # 3. Assert
+>       assert success_count == 1
+E       assert 0 == 1
+
+tests\unit\test_job_processor.py:35: AssertionError
+---------------------------- Captured stderr call -----------------------------
+13:24:57.957 | WARNING | src.services.job_processor.validator - [2m2026-05-12T06:24:57.957866Z[0m [[33m[1mwarning  [0m] [1mLLM Validation rejected page  [0m [[0m[1m[34msrc.services.job_processor.validator[0m][0m [36mreason[0m=[35m'No reason provided'[0m
+13:24:57.958 | WARNING | src.services.job_processor.job_processor - [2m2026-05-12T06:24:57.958378Z[0m [[33m[1mwarning  [0m] [1mJob rejected by validator     [0m [[0m[1m[34msrc.services.job_processor.job_processor[0m][0m [36mreason[0m=[35m'No reason provided'[0m [36murl[0m=[35mhttps://example.com/job/process-me[0m
+------------------------------ Captured log call ------------------------------
+WARNING  src.services.job_processor.validator:validator.py:65 [2m2026-05-12T06:24:57.957866Z[0m [[33m[1mwarning  [0m] [1mLLM Validation rejected page  [0m [[0m[1m[34msrc.services.job_processor.validator[0m][0m [36mreason[0m=[35m'No reason provided'[0m
+WARNING  src.services.job_processor.job_processor:job_processor.py:53 [2m2026-05-12T06:24:57.958378Z[0m [[33m[1mwarning  [0m] [1mJob rejected by validator     [0m [[0m[1m[34msrc.services.job_processor.job_processor[0m][0m [36mreason[0m=[35m'No reason provided'[0m [36murl[0m=[35mhttps://example.com/job/process-me[0m
+_____________________ test_process_jobs_validation_fails ______________________
+
+test_db_session = <sqlalchemy.orm.session.Session object at 0x000001D827976300>
+repo = <src.infrastructure.db.repositories.etl.ETLRepository object at 0x000001D827C7A0F0>
+processor = <src.services.job_processor.job_processor.JobProcessor object at 0x000001D827B05B80>
+mocker = <pytest_mock.plugin.MockerFixture object at 0x000001D827CD1760>
+
+    def test_process_jobs_validation_fails(test_db_session, repo, processor, mocker):
+        # 1. Setup
+        repo.save_raw_job({
+            "url": "https://example.com/job/bad",
+            "raw_markdown": "Too short",
+            "status": "pending"
+        })
+    
+        # Force validator to fail
+        mocker.patch("src.services.job_processor.validator.JobValidator.is_valid", return_value=(False, "Heuristic Failed"))
+    
+        # 2. Act
+        success, fail = processor.process_jobs(limit=10)
+    
+        # 3. Assert
+        assert success == 0
+>       assert fail == 0 # Validation fails don't count as processing errors, they are just dropped/marked invalid.
+        ^^^^^^^^^^^^^^^^
+E       assert 1 == 0
+
+tests\unit\test_job_processor.py:65: AssertionError
+---------------------------- Captured stderr call -----------------------------
+13:25:01.345 | WARNING | src.services.job_processor.job_processor - [2m2026-05-12T06:25:01.345926Z[0m [[33m[1mwarning  [0m] [1mJob rejected by validator     [0m [[0m[1m[34msrc.services.job_processor.job_processor[0m][0m [36mreason[0m=[35m'Heuristic Failed'[0m [36murl[0m=[35mhttps://example.com/job/bad[0m
+------------------------------ Captured log call ------------------------------
+WARNING  src.services.job_processor.job_processor:job_processor.py:53 [2m2026-05-12T06:25:01.345926Z[0m [[33m[1mwarning  [0m] [1mJob rejected by validator     [0m [[0m[1m[34msrc.services.job_processor.job_processor[0m][0m [36mreason[0m=[35m'Heuristic Failed'[0m [36murl[0m=[35mhttps://example.com/job/bad[0m
+-------------------------- Captured stderr teardown ---------------------------
+13:25:01.371 | INFO    | prefect - Stopping temporary server on http://127.0.0.1:8296
+---------------------------- Captured log teardown ----------------------------
+INFO     prefect:server.py:986 Stopping temporary server on http://127.0.0.1:8296
+============================== warnings summary ===============================
+src\infrastructure\db\models.py:8
+  D:\Data_Science_Project\job_finder\src\infrastructure\db\models.py:8: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    Base = declarative_base()
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/integration/test_ingestion_flow.py::test_job_ingestion_flow - as...
+FAILED tests/unit/test_etl_repository.py::test_filter_new_links - AssertionEr...
+FAILED tests/unit/test_etl_repository.py::test_save_parsed_job - pydantic_cor...
+FAILED tests/unit/test_job_processor.py::test_process_jobs_success - assert 0...
+FAILED tests/unit/test_job_processor.py::test_process_jobs_validation_fails
+================== 5 failed, 3 passed, 3 warnings in 28.75s ===================

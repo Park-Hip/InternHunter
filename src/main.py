@@ -47,9 +47,9 @@ def main():
         asyncio.run(run_crawler_pipeline(run_id))
     
     elif args.command == "init-db":
-        from src.infrastructure.db.repository import JobRepository
+        from src.infrastructure.db.repositories.etl import ETLRepository
         logger.info("Initializing database schema")
-        repo = JobRepository()
+        repo = ETLRepository()
         repo.create_tables()
         logger.info("Database initialized successfully")
 

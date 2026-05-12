@@ -3,6 +3,9 @@ import json
 from abc import ABC, abstractmethod
 
 from src.core.models import ProcessedJob, RawJob
+from src.infrastructure.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class LLMProvider(ABC):
@@ -29,9 +32,9 @@ class LLMProvider(ABC):
 
         flags = re.DOTALL | re.IGNORECASE
 
-        des_pattern = r"(?:Mô tả công việc|Job\s*Summary)(.*?)(?=Yêu cầu ứng viên|Responsibilities|$)"
-        req_pattern = r"(?:Yêu cầu ứng viên|Responsibilities)(.*?)(?=Quyền lợi|Benefits|$)"
-        ben_pattern = r"(?:Quyền lợi|Benefits)(.*)"
+        des_pattern = r"(?:Mô tả(?:\s+công\s+việc)?|Job\s*(?:Summary|Description))(.*?)(?=Yêu cầu|Responsibilities|Requirements|$)"
+        req_pattern = r"(?:Yêu cầu(?:\s+ứng\s+viên)?|Responsibilities|Requirements)(.*?)(?=Quyền lợi|Phúc lợi|Benefits|$)"
+        ben_pattern = r"(?:Quyền lợi(?:\s+được\s+hưởng)?|Phúc lợi|Benefits)(.*)"
 
         des_match = re.search(des_pattern, info, flags)
         req_match = re.search(req_pattern, info, flags)
@@ -56,7 +59,8 @@ class LLMProvider(ABC):
                 raw_context = json.loads(job_data.full_json_dump)
                 info = raw_context.get("info", "")
                 description, requirement, benefit = self._extract_info(info)
-            except Exception:
-                pass
+            except (json.JSONDecodeError, TypeError) as e:
+                logger.warning("Failed to parse full_json_dump, using empty context",
+                               url=getattr(job_data, 'url', 'unknown'), error=str(e))
 
         return raw_context, description, requirement, benefit

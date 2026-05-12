@@ -2,7 +2,8 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 from langchain_community.utilities import SQLDatabase
 from langchain.chains import create_sql_query_chain
-from src.infrastructure.db.repository import JobRepository
+from src.infrastructure.db.repositories.search import SearchRepository
+from src.infrastructure.db.repositories.chat import ChatRepository
 from src.infrastructure.db.session import engine
 from src.infrastructure.llm.router import llm_router
 from src.services.chat.tool_registry import register_tool
@@ -10,7 +11,8 @@ from src.services.job_processor.embedder import Embedder
 from src.infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
-repo = JobRepository()
+search_repo = SearchRepository()
+chat_repo = ChatRepository()
 embedder = Embedder()
 db = SQLDatabase(engine)
 
@@ -54,11 +56,11 @@ class MatchResumeArgs(BaseModel):
 )
 def execute_match_resume(user_id: str, limit: int = 5) -> List[Dict[str, Any]]:
     try:
-        profile = repo.get_user_profile(user_id)
+        profile = chat_repo.get_user_profile(user_id)
         if not profile or not profile.get("resume_embedding"):
             return [{"error": "No resume found for this user. Please upload a resume first."}]
         
-        results = repo.search_jobs_by_similarity(profile["resume_embedding"], limit=limit)
+        results = search_repo.search_jobs_by_similarity(profile["resume_embedding"], limit=limit)
         return results
     except Exception as e:
         logger.error("execute_match_resume failed", error=str(e))
@@ -78,7 +80,7 @@ class UploadResumeArgs(BaseModel):
 def execute_upload_resume(user_id: str, resume_text: str) -> str:
     try:
         embedding = embedder.generate_embedding(resume_text)
-        if repo.save_user_profile(user_id, resume_text, embedding):
+        if chat_repo.save_user_profile(user_id, resume_text, embedding):
             return "Resume successfully uploaded and vectorized. You can now ask me to match jobs based on your profile!"
         return "Failed to save resume to the database."
     except Exception as e:

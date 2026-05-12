@@ -1,9 +1,9 @@
-from src.infrastructure.db.repository import JobRepository
+from src.infrastructure.db.repositories.etl import ETLRepository
 from src.infrastructure.db.session import SessionLocal
 from src.infrastructure.db.models import AuditJobDB, RawJobDB, CleanJobDB
 
 def check():
-    repo = JobRepository()
+    repo = ETLRepository()
     session = SessionLocal()
     
     print(f"Total Raw Jobs: {repo.get_raw_jobs_count()}")

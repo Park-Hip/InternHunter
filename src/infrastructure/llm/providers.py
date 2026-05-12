@@ -13,6 +13,24 @@ from groq import Groq
 
 logger = get_logger(__name__)
 
+# Transient exceptions worth retrying (NOT validation/parse errors)
+_base_retry = (ConnectionError, TimeoutError)
+
+try:
+    from google.api_core.exceptions import ResourceExhausted, ServiceUnavailable, DeadlineExceeded
+    GEMINI_RETRY_EXCEPTIONS = _base_retry + (ResourceExhausted, ServiceUnavailable, DeadlineExceeded)
+except ImportError:
+    GEMINI_RETRY_EXCEPTIONS = _base_retry
+
+GROQ_RETRY_EXCEPTIONS = _base_retry
+
+# Try to add Groq-specific transient exceptions
+try:
+    from groq import RateLimitError as GroqRateLimitError, APIConnectionError as GroqAPIConnectionError
+    GROQ_RETRY_EXCEPTIONS = GROQ_RETRY_EXCEPTIONS + (GroqRateLimitError, GroqAPIConnectionError)
+except ImportError:
+    pass
+
 try:
     import mlflow
     mlflow_cfg = settings.config_yaml.get("mlflow", {})
@@ -67,12 +85,16 @@ class GeminiClient(LLMProvider):
         self.max_tokens = cfg.get("max_tokens", 2048)
         
         self.client = genai.Client(api_key=self.api_key)
-        mlflow.gemini.autolog()
+        if _mlflow_available:
+            try:
+                mlflow.gemini.autolog()
+            except Exception as e:
+                logger.warning("MLflow autolog setup failed", error=str(e))
 
     @retry(
         stop=stop_after_attempt(settings.config_yaml.get("crawler", {}).get("max_retries", 3)),
         wait=wait_exponential(multiplier=1, min=4, max=60),
-        retry=retry_if_exception_type(Exception)
+        retry=retry_if_exception_type(GEMINI_RETRY_EXCEPTIONS)
     )
     def process_raw_job(self, job_data: RawJob) -> ProcessedJob:
         """Generates structured job data from raw dictionary using Gemini."""
@@ -106,7 +128,7 @@ class GeminiClient(LLMProvider):
     @retry(
         stop=stop_after_attempt(settings.config_yaml.get("crawler", {}).get("max_retries", 3)),
         wait=wait_exponential(multiplier=1, min=4, max=60),
-        retry=retry_if_exception_type(Exception)
+        retry=retry_if_exception_type(GEMINI_RETRY_EXCEPTIONS)
     )
     def translate(self, text: str) -> str:
         """Translate text to English using Gemini."""
@@ -140,7 +162,7 @@ class GroqClient(LLMProvider):
     @retry(
         stop=stop_after_attempt(settings.config_yaml.get("crawler", {}).get("max_retries", 3)),
         wait=wait_exponential(multiplier=1, min=4, max=60),
-        retry=retry_if_exception_type(Exception)
+        retry=retry_if_exception_type(GROQ_RETRY_EXCEPTIONS)
     )
     def process_raw_job(self, job_data: RawJob) -> ProcessedJob:
         """Generates structured job data from raw dictionary using Groq."""
@@ -182,7 +204,7 @@ class GroqClient(LLMProvider):
     @retry(
         stop=stop_after_attempt(settings.config_yaml.get("crawler", {}).get("max_retries", 3)),
         wait=wait_exponential(multiplier=1, min=4, max=60),
-        retry=retry_if_exception_type(Exception)
+        retry=retry_if_exception_type(GROQ_RETRY_EXCEPTIONS)
     )
     def translate(self, text: str) -> str:
         """Translate text to English using Groq."""

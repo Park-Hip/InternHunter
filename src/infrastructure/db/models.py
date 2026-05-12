@@ -100,3 +100,13 @@ class UserProfileDB(Base):
     resume_embedding = Column(Vector(768))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+class PipelineRunDB(Base):
+    __tablename__ = 'pipeline_runs'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    run_id = Column(String, unique=True, index=True, nullable=False)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    jobs_acquired = Column(Integer, default=0)
+    jobs_processed = Column(Integer, default=0)
+    jobs_failed = Column(Integer, default=0)
+    status = Column(String, default="completed") # completed, failed

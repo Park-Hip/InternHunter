@@ -1,7 +1,8 @@
+import asyncio
 import time
 
 from src.infrastructure.llm.router import llm_router
-from src.infrastructure.db.repository import JobRepository
+from src.infrastructure.db.repositories.etl import ETLRepository
 from src.services.job_processor.embedder import Embedder
 from src.config.settings import settings
 from src.infrastructure.logging import get_logger
@@ -15,22 +16,42 @@ class JobProcessor():
         self.embedder = Embedder()
 
     def _build_embedding_text(self, parsed_result) -> str:
-        """Build a text representation of the parsed job for embedding."""
+        """
+        Build a rich text representation of the parsed job for embedding.
+        """
         parts = []
         if parsed_result.standardized_title:
-            parts.append(parsed_result.standardized_title)
+            parts.append(f"Title: {parsed_result.standardized_title}")
+        if parsed_result.job_level:
+            parts.append(f"Level: {parsed_result.job_level}")
+        if parsed_result.cities:
+            parts.append(f"Location: {', '.join(parsed_result.cities)}")
         if parsed_result.description:
             parts.append(parsed_result.description)
+        if parsed_result.requirement:
+            parts.append(parsed_result.requirement)
+        if parsed_result.tech_stack:
+            parts.append(f"Tech Stack: {', '.join(parsed_result.tech_stack)}")
         if parsed_result.technical_competencies:
-            parts.append(", ".join(parsed_result.technical_competencies))
+            parts.append(f"Competencies: {', '.join(parsed_result.technical_competencies)}")
+        if parsed_result.domain_knowledge:
+            parts.append(f"Domain: {', '.join(parsed_result.domain_knowledge)}")
         return "\n".join(parts)
 
-    def process_jobs(self, limit: int = 100):
+    async def process_jobs(self, limit: int = 100):
+        """Process pending raw jobs through validation, LLM transformation, embedding, and loading.
+        
+        Async with smart rate limiting: only sleeps the remaining interval after
+        accounting for actual LLM processing time.
+        
+        Returns:
+            (success_count, fail_count)
+        """
         logger.info("Job processing cycle starting", limit=limit)
 
         from src.services.job_processor.validator import JobValidator
         validator = JobValidator()
-        repo = JobRepository()
+        repo = ETLRepository()
         
         # Use new production-grade fetch
         jobs = repo.fetch_pending_raw_jobs(limit=limit)
@@ -38,11 +59,12 @@ class JobProcessor():
         success_count = 0
         fail_count = 0
 
-        rate_limit = settings.config_yaml.get("crawler", {}).get("rate_limit_rpm", 20)
+        # Smart rate limiting: only sleep the remaining time after LLM call
+        llm_rpm = settings.config_yaml.get("llm", {}).get("rate_limit_rpm", 20)
+        min_interval = 60.0 / llm_rpm if llm_rpm > 0 else 0
+
         for job in jobs:
-            if rate_limit > 0:
-                sleep_time = 60 / rate_limit
-                time.sleep(sleep_time)
+            iteration_start = time.monotonic()
 
             try:
                 # Step 1: Validation Guardrail (Heuristics + LLM-Lite)
@@ -107,8 +129,15 @@ class JobProcessor():
                 })
                 fail_count += 1
 
-        logger.info("Batch completed", success=success_count, failed=fail_count)
+            # Smart rate limiting: only sleep the remaining interval
+            elapsed = time.monotonic() - iteration_start
+            if min_interval > 0 and elapsed < min_interval:
+                sleep_time = min_interval - elapsed
+                await asyncio.sleep(sleep_time)
 
-def run_pipeline(limit: int = 10):
+        logger.info("Batch completed", success=success_count, failed=fail_count)
+        return success_count, fail_count
+
+async def run_pipeline(limit: int = 10):
     processor = JobProcessor()
-    processor.process_jobs(limit=limit)
+    await processor.process_jobs(limit=limit)

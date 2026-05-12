@@ -13,15 +13,20 @@ Usage:
     logger = get_logger(__name__)
     logger.info("Processing job", job_id=123, url="example.com")
     
-    # Bind context for request/session
+    # Bind context for request/session (additive)
     from src.infrastructure.logging import bind_context
     bind_context(request_id="abc-123", user_id=456)
+    
+    # Reset context for new pipeline run (destructive)
+    from src.infrastructure.logging import reset_context
+    reset_context(run_id="new-run")
 """
 
 from src.infrastructure.logging.config import (
     configure_logging,
     get_logger,
     bind_context,
+    reset_context,
     clear_context
 )
 
@@ -29,5 +34,6 @@ __all__ = [
     "configure_logging",
     "get_logger",
     "bind_context",
+    "reset_context",
     "clear_context"
 ]

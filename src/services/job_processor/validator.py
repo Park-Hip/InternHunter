@@ -2,15 +2,16 @@ import re
 import json
 from typing import Tuple
 from src.infrastructure.llm.providers import GeminiClient
+from src.config.settings import settings
 from src.infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
 
 class JobValidator:
     def __init__(self):
-        # Use lite model for cheap validation
-        # Ensure gemini-2.0-flash-lite is in your config or pass it here
-        self.lite_client = GeminiClient(model="gemini-2.0-flash-lite")
+        # Use lite model for cheap validation — configurable via settings.yaml
+        validation_model = settings.config_yaml.get("llm", {}).get("validation_model", "gemini-2.0-flash-lite")
+        self.lite_client = GeminiClient(model=validation_model)
         
     def heuristic_check(self, text: str) -> bool:
         """Rapid check using length and keywords."""

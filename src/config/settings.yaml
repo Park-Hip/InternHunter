@@ -1,6 +1,7 @@
 llm:
   primary_provider: "gemini"
   fallback_provider: "groq"
+  validation_model: "gemini-2.0-flash-lite"
   
   gemini:
     model: "gemini-2.5-flash-lite"
@@ -19,6 +20,9 @@ agent:
 crawler:
   rate_limit_rpm: 20
   max_retries: 3
+  max_pages: 5
+  extract_delay_min: 10.0
+  extract_delay_max: 15.0
 
 logging:
   format: "console"
