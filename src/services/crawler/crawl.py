@@ -36,6 +36,16 @@ logger = get_logger(__name__)
 # Retry on transient network/IO errors only (do not retry on block/captcha - those are in result)
 RETRY_EXCEPTIONS = (ConnectionError, OSError, asyncio.TimeoutError, TimeoutError)
 
+BLOCKED_PAGE_PHRASES = (
+    "Verify you are human",
+    "Just a moment",
+    "Please enable cookies",
+    "Sorry, you have been blocked",
+    "You are unable to access topcv.vn",
+    "Cloudflare Ray ID",
+    "Performance & security by",
+)
+
 
 def _extract_raw_markdown(result) -> str | None:
     """Compatibility helper for crawl4ai markdown result shapes."""
@@ -50,6 +60,12 @@ def _extract_raw_markdown(result) -> str | None:
         return markdown_result
 
     return getattr(markdown_result, "raw_markdown", None)
+
+
+def _is_blocked_page(text: str | None) -> bool:
+    if not text:
+        return False
+    return any(phrase.lower() in text.lower() for phrase in BLOCKED_PAGE_PHRASES)
 
 
 class Crawler:
@@ -90,7 +106,7 @@ class Crawler:
             return [], FetchStatus.NETWORK_FAIL
 
         # Check for bot blocking
-        if "Verify you are human" in (result.html or "") or "Just a moment" in (result.html or ""):
+        if _is_blocked_page(result.html):
             logger.warning("Blocked by captcha/verification", phase="fetch_links", status="block", url=url)
             return [], FetchStatus.BLOCKED
 
@@ -273,7 +289,7 @@ class Crawler:
                 logger.warning("CSS extraction failed/poor quality, using RAW fallback", url=url)
                 
                 html = (result.html or "")
-                is_blocked = "Verify you are human" in html or "Just a moment" in html
+                is_blocked = _is_blocked_page(html)
                 blocked_reason = None
                 if is_blocked:
                     blocked_reason = "blocked_or_empty_content"

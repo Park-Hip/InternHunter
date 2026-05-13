@@ -94,7 +94,7 @@ async def test_extract_single_job_returns_pending_raw_extraction_for_normal_topc
 async def test_extract_single_job_marks_blocked_or_empty_content_as_blocked(mocker):
     html = (FIXTURE_DIR / "blocked_or_empty.html").read_text(encoding="utf-8")
     blocked_metadata = json.loads((FIXTURE_DIR / "blocked_or_empty.expected_failure.json").read_text(encoding="utf-8"))
-    blocked_markdown = "Verify you are human. Access denied."
+    blocked_markdown = "Sorry, you have been blocked. Please enable cookies. Cloudflare Ray ID: 1234567890abcdef"
 
     mock_result = MockCrawlResult(
         html=html,
@@ -116,7 +116,7 @@ async def test_extract_single_job_marks_blocked_or_empty_content_as_blocked(mock
     assert result.status == "blocked"
     assert result.extraction_method == "raw"
     assert result.raw_markdown is not None
-    assert "Verify you are human" in result.html
+    assert "Cloudflare Ray ID" in result.html
     assert result.full_json_dump["is_blocked"] is True
     assert result.full_json_dump["blocked_reason"] == "blocked_or_empty_content"
 
@@ -265,3 +265,38 @@ async def test_crawl_jobs_force_recrawl_refreshes_duplicate_raw_job_without_coll
     assert saved_job is not None
     assert saved_job.retry_count == 1
     assert saved_job.title == "Title"
+
+
+@pytest.mark.asyncio
+async def test_crawl_jobs_saves_blocked_jobs_as_blocked_not_pending(mocker, test_db_session):
+    from src.infrastructure.db.models import RawJobDB, AuditJobDB
+
+    crawler = Crawler()
+    blocked_url = "https://example.com/job/cloudflare-blocked"
+    blocked_extraction = DummyExtraction(blocked_url)
+    blocked_extraction.status = "blocked"
+    blocked_extraction.html = (
+        "<html><body>"
+        "Please enable cookies. Sorry, you have been blocked. "
+        "You are unable to access topcv.vn. Cloudflare Ray ID: abc123. "
+        "Performance &amp; security by Cloudflare."
+        "</body></html>"
+    )
+
+    mocker.patch("src.services.crawler.crawl.AsyncWebCrawler", return_value=DummyAsyncWebCrawler())
+    mocker.patch("src.services.crawler.crawl.ETLRepository.get_raw_jobs_count", return_value=0)
+    mocker.patch("src.services.crawler.crawl.ETLRepository.filter_new_links", side_effect=lambda links: links)
+    mocker.patch("src.services.crawler.crawl.Crawler.extract_single_job", return_value=blocked_extraction)
+
+    saved, failed = await crawler.crawl_jobs([{"url": blocked_url}], "run-blocked-case", force_recrawl=True)
+
+    assert saved == 1
+    assert failed == 0
+
+    saved_job = test_db_session.query(RawJobDB).filter_by(url=blocked_url).first()
+    assert saved_job is not None
+    assert saved_job.status == "blocked"
+
+    audit_row = test_db_session.query(AuditJobDB).filter_by(url=blocked_url).first()
+    assert audit_row is not None
+    assert audit_row.error_type == "BOT_DETECTED"
