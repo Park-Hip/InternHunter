@@ -12,6 +12,24 @@ search_repo = SearchRepository()
 chat_repo = ChatRepository()
 embedder = Embedder()
 
+
+def is_missing_embedding(embedding: Any) -> bool:
+    """Return True when an embedding is absent or empty, without relying on truthiness."""
+    if embedding is None:
+        return True
+
+    size = getattr(embedding, "size", None)
+    if size is not None:
+        try:
+            return int(size) == 0
+        except (TypeError, ValueError):
+            pass
+
+    try:
+        return len(embedding) == 0
+    except TypeError:
+        return False
+
 # --- Text-to-SQL Tool ---
 
 class SQLSearchArgs(BaseModel):
@@ -59,10 +77,14 @@ class MatchResumeArgs(BaseModel):
 def execute_match_resume(user_id: str, limit: int = 5) -> List[Dict[str, Any]]:
     try:
         profile = chat_repo.get_user_profile(user_id)
-        if not profile or not profile.get("resume_embedding"):
+        if profile is None:
             return [{"error": "No resume found for this user. Please upload a resume first."}]
-        
-        results = search_repo.search_jobs_by_similarity(profile["resume_embedding"], limit=limit)
+
+        resume_embedding = profile.get("resume_embedding")
+        if is_missing_embedding(resume_embedding):
+            return [{"error": "No resume found for this user. Please upload a resume first."}]
+
+        results = search_repo.search_jobs_by_similarity(resume_embedding, limit=limit)
         return results
     except Exception as e:
         logger.error("execute_match_resume failed", error=str(e))
