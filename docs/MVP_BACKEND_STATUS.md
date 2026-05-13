@@ -58,7 +58,7 @@ uv run uvicorn src.internhunter.api.app:app --reload
 Available endpoints:
 
 1. `GET /health`
-2. `GET /jobs/search`
+2. `GET /jobs/search` (`mode=criteria` by default, `mode=semantic` when Gemini embedding is configured)
 3. `POST /resume/match`
 
 ## Required Environment
@@ -85,12 +85,12 @@ The MVP backend works, but the following limitations are still known:
 
 1. TopCV Cloudflare blocking still happens on live crawls.
 2. CSS extraction often falls back to raw fallback.
-3. `match_score` in semantic search is currently coarse / placeholder-like.
+3. `match_score` is meaningful in semantic search, but criteria mode still uses exact/fallback behavior.
 4. `--force-recrawl` is dev-only and should not be treated as a production mode.
 5. `--skip-llm-validation` is dev-only and should not be treated as a production mode.
 6. There is no UI yet.
 7. There is no polished API demo yet.
-8. `/jobs/search` currently uses DB criteria matching first, with a recent clean-job fallback, not semantic query embedding yet.
+8. `/jobs/search` supports both criteria and semantic modes; semantic mode depends on the Gemini embedding key/quota.
 9. `/resume/match` needs a Gemini embedding key.
 10. There is no auth.
 
@@ -151,6 +151,12 @@ curl http://127.0.0.1:8000/health
 curl "http://127.0.0.1:8000/jobs/search?query=data%20scientist&limit=5"
 ```
 
+Semantic mode:
+
+```powershell
+curl "http://127.0.0.1:8000/jobs/search?query=python%20machine%20learning&limit=5&mode=semantic"
+```
+
 ### `POST /resume/match`
 
 ```powershell
@@ -173,7 +179,8 @@ The backend MVP is now working across:
 
 1. No auth.
 2. No frontend.
-3. `/jobs/search` uses DB criteria matching plus a recent clean-job fallback, not semantic query embedding yet.
-4. `/resume/match` needs a Gemini embedding key.
-5. TopCV may block crawling.
-6. `match_score` still appears coarse.
+3. `/jobs/search` defaults to criteria mode, but `mode=semantic` is available when Gemini is configured.
+4. Semantic `/jobs/search` depends on Gemini key/quota.
+5. `/resume/match` needs a Gemini embedding key.
+6. TopCV may block crawling.
+7. `match_score` is meaningful in semantic mode, but criteria mode still uses exact/fallback behavior.

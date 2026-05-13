@@ -49,7 +49,7 @@ uv run uvicorn src.internhunter.api.app:app --reload
 ## API Endpoints
 
 - `GET /health`
-- `GET /jobs/search`
+- `GET /jobs/search` (`mode=criteria` by default, `mode=semantic` available when the Gemini embedding key is configured)
 - `POST /resume/match`
 
 Examples:
@@ -57,6 +57,7 @@ Examples:
 ```powershell
 curl http://127.0.0.1:8000/health
 curl "http://127.0.0.1:8000/jobs/search?query=data%20scientist&limit=5"
+curl "http://127.0.0.1:8000/jobs/search?query=python%20machine%20learning&limit=5&mode=semantic"
 curl -X POST http://127.0.0.1:8000/resume/match `
   -H "Content-Type: application/json" `
   -d "{\"user_id\":\"demo-user\",\"resume_text\":\"Python data scientist with machine learning, SQL, NLP, statistics, FastAPI, and data visualization experience.\",\"limit\":5}"
@@ -71,8 +72,7 @@ curl -X POST http://127.0.0.1:8000/resume/match `
 
 - TopCV may block crawling with Cloudflare.
 - Gemini key/quota is still needed for embeddings and resume matching.
-- `match_score` is still coarse in the MVP search results.
+- `match_score` is meaningful in semantic mode, but criteria mode still uses exact/fallback behavior.
 - No auth yet.
 - No frontend yet.
-- `/jobs/search` currently uses DB criteria matching with a recent clean-job fallback, not semantic query embedding yet.
-
+- Semantic `/jobs/search` depends on the Gemini key/quota.

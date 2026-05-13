@@ -85,6 +85,12 @@ curl http://127.0.0.1:8000/health
 curl "http://127.0.0.1:8000/jobs/search?query=data%20scientist&limit=5"
 ```
 
+Semantic mode:
+
+```powershell
+curl "http://127.0.0.1:8000/jobs/search?query=python%20machine%20learning&limit=5&mode=semantic"
+```
+
 ### Resume Match
 
 ```powershell
@@ -114,7 +120,7 @@ The most likely failure points are:
 2. Gemini quota blocks validation, embedding, or resume upload.
 3. No `clean_jobs` rows exist yet.
 4. No embeddings exist yet in `clean_jobs`.
-5. `match_score` looks coarse because semantic ranking is still a minimal MVP implementation.
+5. `match_score` is meaningful in semantic mode, but criteria mode still uses exact/fallback behavior.
 
 ## 9. What “MVP Success” Means
 

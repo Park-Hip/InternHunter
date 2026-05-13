@@ -160,6 +160,12 @@ Success looks like:
 curl "http://127.0.0.1:8000/jobs/search?query=data%20scientist&limit=5"
 ```
 
+Semantic mode:
+
+```powershell
+curl "http://127.0.0.1:8000/jobs/search?query=python%20machine%20learning&limit=5&mode=semantic"
+```
+
 Say:
 - “This is the simplest search endpoint in the demo.”
 - “It uses the current clean job data and returns relevant jobs.”
@@ -188,11 +194,12 @@ Be direct about the current rough edges:
 
 - TopCV can still block crawling with Cloudflare.
 - Gemini key/quota is still needed for embeddings and resume matching.
-- `match_score` is still coarse in the current MVP.
+- `match_score` is meaningful in semantic mode, but criteria mode still uses exact/fallback behavior.
 - There is no auth yet.
 - There is no frontend yet.
 - `--force-recrawl` is dev-only.
 - `--skip-llm-validation` is dev-only.
+- Criteria mode is the default for `/jobs/search`; semantic mode is explicit and depends on Gemini.
 
 ## 5. Strong Closing Summary
 
