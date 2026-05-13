@@ -143,7 +143,36 @@ What to say:
 - “This exposes the MVP backend through a minimal FastAPI demo.”
 - “The API is intentionally small so it stays easy to understand and demo.”
 
-### Step 5: Call the endpoints
+### Step 5: Run the API smoke script
+
+Command:
+
+```powershell
+uv run python src/scripts/api_demo_smoke.py
+```
+
+If Gemini is unavailable, quota is exhausted, or you want to demo the DB-only backend path:
+
+```powershell
+uv run python src/scripts/api_demo_smoke.py --skip-semantic --skip-resume
+```
+
+What to say:
+- "I’m now verifying the API with one command instead of clicking through endpoints."
+- "This script checks health, criteria search, semantic search, and resume matching unless those steps are skipped."
+
+What the output proves:
+- The API server is reachable.
+- `/health` works.
+- Criteria search works.
+- Semantic search works when enabled.
+- Resume matching works when enabled.
+
+Success looks like:
+- PASS lines for the required checks.
+- HTTP 200 responses for the checked endpoints.
+
+### Step 6: Call the endpoints
 
 `GET /health`
 

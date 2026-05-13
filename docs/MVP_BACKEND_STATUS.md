@@ -64,6 +64,27 @@ Run the local demo API:
 uv run uvicorn src.internhunter.api.app:app --reload
 ```
 
+API smoke script:
+
+```powershell
+uv run python src/scripts/api_demo_smoke.py
+```
+
+No-key / DB-only mode:
+
+```powershell
+uv run python src/scripts/api_demo_smoke.py --skip-semantic --skip-resume
+```
+
+Start `uvicorn` first. The smoke script checks:
+
+1. `/health`
+2. `/jobs/search` in criteria mode
+3. `/jobs/search` in semantic mode unless skipped
+4. `/resume/match` unless skipped
+
+Use `--skip-semantic` and `--skip-resume` when Gemini is unavailable, quota is exhausted, or you want to demo the DB-only backend path.
+
 Available endpoints:
 
 1. `GET /health`

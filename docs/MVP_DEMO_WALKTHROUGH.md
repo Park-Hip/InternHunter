@@ -78,7 +78,28 @@ Start the local demo API:
 uv run uvicorn src.internhunter.api.app:app --reload
 ```
 
-## 6. Test the Endpoints
+## 6. Run the API Smoke Script
+
+Start the API first, then run:
+
+```powershell
+uv run python src/scripts/api_demo_smoke.py
+```
+
+If Gemini is unavailable, quota is exhausted, or you want to demo the DB-only backend path:
+
+```powershell
+uv run python src/scripts/api_demo_smoke.py --skip-semantic --skip-resume
+```
+
+The script checks:
+
+1. `/health`
+2. `/jobs/search` in criteria mode
+3. `/jobs/search` in semantic mode unless skipped
+4. `/resume/match` unless skipped
+
+## 7. Test the Endpoints
 
 ### Health
 
@@ -106,7 +127,7 @@ curl -X POST http://127.0.0.1:8000/resume/match `
   -d "{\"user_id\":\"demo-user\",\"resume_text\":\"Python data scientist with machine learning, SQL, NLP, statistics, FastAPI, and data visualization experience.\",\"limit\":5}"
 ```
 
-## 7. Expected Successful Outputs
+## 8. Expected Successful Outputs
 
 If everything is working, you should see:
 
@@ -119,7 +140,7 @@ If everything is working, you should see:
 6. `/jobs/search` returning a list of jobs.
 7. `/resume/match` returning a list of matched jobs.
 
-## 8. Common Failures
+## 9. Common Failures
 
 The most likely failure points are:
 
@@ -130,7 +151,7 @@ The most likely failure points are:
 5. `match_score` is meaningful in semantic mode, but criteria mode still uses exact/fallback behavior.
 6. Older raw rows may have `crawl_run_id = NULL` until they are refreshed by a new crawl run.
 
-## 9. What “MVP Success” Means
+## 10. What “MVP Success” Means
 
 The MVP is successful if all of these are true:
 

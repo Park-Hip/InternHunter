@@ -53,6 +53,27 @@ uv run python src/scripts/semantic_search_smoke.py --query "python machine learn
 uv run uvicorn src.internhunter.api.app:app --reload
 ```
 
+### 5. Run the API smoke script
+
+Start the API first, then run:
+
+```powershell
+uv run python src/scripts/api_demo_smoke.py
+```
+
+If you are missing a Gemini key, hit quota, or want to demo the DB-only backend path, use:
+
+```powershell
+uv run python src/scripts/api_demo_smoke.py --skip-semantic --skip-resume
+```
+
+The script checks:
+
+- `/health`
+- `/jobs/search` in criteria mode
+- `/jobs/search` in semantic mode unless skipped
+- `/resume/match` unless skipped
+
 ## API Endpoints
 
 - `GET /health`
