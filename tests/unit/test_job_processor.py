@@ -1,11 +1,13 @@
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
-from src.internhunter.extraction.job_processor import JobProcessor
+from src.internhunter.extraction.job_processor import JobProcessor, build_validation_text
 from src.infrastructure.db.repositories.etl import ETLRepository
 from src.infrastructure.db.models import RawJobDB, AuditJobDB
 from src.core.models import ProcessedJob
+from src.services.job_processor.validator import JobValidator
 
 
 FIXTURE_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "topcv"
@@ -28,6 +30,68 @@ def load_processed_job_fixture(name: str) -> ProcessedJob:
 
 def get_latest_audit_row(test_db_session):
     return test_db_session.query(AuditJobDB).order_by(AuditJobDB.id.desc()).first()
+
+
+def test_build_validation_text_includes_css_success_fields():
+    job = SimpleNamespace(
+        title="Data Scientist",
+        company="TopCV",
+        location="Hanoi",
+        raw_markdown=None,
+        full_json_dump={
+            "title": "Data Scientist",
+            "company": "TopCV",
+            "location": "Hanoi",
+            "info": "This is a detailed job info section with responsibilities and requirements.",
+            "metadata": {"blocked_reason": "blocked_or_empty_content"},
+        },
+    )
+
+    text = build_validation_text(job)
+
+    assert "Data Scientist" in text
+    assert "TopCV" in text
+    assert "Hanoi" in text
+    assert "detailed job info section" in text
+    assert "blocked_or_empty_content" not in text
+
+
+def test_build_validation_text_uses_raw_markdown_for_raw_fallback():
+    job = SimpleNamespace(
+        title="Unknown (RAW)",
+        company="Unknown (RAW)",
+        location="Unknown",
+        raw_markdown="This is a raw markdown job description with enough detail to validate.",
+        full_json_dump={
+            "error": "CSS extraction failed",
+            "is_blocked": False,
+            "blocked_reason": "empty_or_unparseable_css_content",
+        },
+    )
+
+    text = build_validation_text(job)
+
+    assert "This is a raw markdown job description" in text
+    assert "Unknown (RAW)" in text
+    assert "empty_or_unparseable_css_content" not in text
+
+
+def test_build_validation_text_ignores_blocked_metadata_only_payload():
+    job = SimpleNamespace(
+        title=None,
+        company=None,
+        location=None,
+        raw_markdown=None,
+        full_json_dump={
+            "error": "CSS extraction failed",
+            "is_blocked": True,
+            "blocked_reason": "blocked_or_empty_content",
+        },
+    )
+
+    text = build_validation_text(job)
+
+    assert text == ""
 
 @pytest.mark.asyncio
 async def test_process_jobs_success(test_db_session, repo, processor, mocker):
@@ -86,6 +150,134 @@ async def test_process_jobs_success(test_db_session, repo, processor, mocker):
     assert clean_job.standardized_title == "Software Engineer Test"
     assert clean_job.job_level == "Mid"
     assert "Python" in clean_job.tech_stack
+
+
+@pytest.mark.asyncio
+async def test_process_jobs_default_mode_uses_llm_validation(test_db_session, repo, processor, mocker):
+    repo.save_raw_job({
+        "url": "https://example.com/job/default-validation",
+        "title": "Data Scientist",
+        "company": "TopCV",
+        "location": "Hanoi",
+        "full_json_dump": {
+            "title": "Data Scientist",
+            "company": "TopCV",
+            "location": "Hanoi",
+            "info": "This job description contains enough detail and job-like keywords to pass heuristics.",
+            "requirement": "Python, SQL",
+            "benefit": "Flexible work",
+        },
+        "status": "pending",
+    })
+
+    llm_validate = mocker.patch.object(JobValidator, "validate_with_llm", return_value=(True, "LLM ok"))
+    mocker.patch.object(JobValidator, "heuristic_check", return_value=True)
+    mocker.patch(
+        "src.internhunter.extraction.job_processor.llm_router.process_with_fallback",
+        return_value=ProcessedJob(
+            standardized_title="Software Engineer Test",
+            job_level="Mid",
+            is_internship=False,
+            cities=["Hanoi"],
+            experience=2.0,
+            min_gpa=None,
+            english_requirement=None,
+            salary_min=None,
+            salary_max=None,
+            currency="VND",
+            is_salary_negotiable=False,
+            tech_stack=["Python", "FastAPI"],
+            technical_competencies=["Build APIs"],
+            domain_knowledge=["Web Development"],
+            description="A realistic cleaned job description for testing.",
+            requirement="Python, APIs, testing",
+            benefit="Flexible work",
+        ),
+    )
+    mocker.patch("src.internhunter.embeddings.embedder.Embedder.generate_embedding", return_value=[0.1] * 768)
+
+    success_count, fail_count = await processor.process_jobs(limit=10)
+
+    assert llm_validate.called
+    assert success_count == 1
+    assert fail_count == 0
+
+
+@pytest.mark.asyncio
+async def test_process_jobs_skip_llm_validation_bypasses_llm_validation(test_db_session, repo, processor, mocker):
+    repo.save_raw_job({
+        "url": "https://example.com/job/skip-validation",
+        "title": "Data Scientist",
+        "company": "TopCV",
+        "location": "Hanoi",
+        "full_json_dump": {
+            "title": "Data Scientist",
+            "company": "TopCV",
+            "location": "Hanoi",
+            "info": "This job description contains enough detail and job-like keywords to pass heuristics.",
+            "requirement": "Python, SQL",
+            "benefit": "Flexible work",
+        },
+        "status": "pending",
+    })
+
+    mocker.patch.object(JobValidator, "heuristic_check", return_value=True)
+    mocker.patch.object(JobValidator, "validate_with_llm", side_effect=AssertionError("LLM validation should be skipped"))
+    mocker.patch(
+        "src.internhunter.extraction.job_processor.llm_router.process_with_fallback",
+        return_value=ProcessedJob(
+            standardized_title="Software Engineer Test",
+            job_level="Mid",
+            is_internship=False,
+            cities=["Hanoi"],
+            experience=2.0,
+            min_gpa=None,
+            english_requirement=None,
+            salary_min=None,
+            salary_max=None,
+            currency="VND",
+            is_salary_negotiable=False,
+            tech_stack=["Python", "FastAPI"],
+            technical_competencies=["Build APIs"],
+            domain_knowledge=["Web Development"],
+            description="A realistic cleaned job description for testing.",
+            requirement="Python, APIs, testing",
+            benefit="Flexible work",
+        ),
+    )
+    mocker.patch("src.internhunter.embeddings.embedder.Embedder.generate_embedding", return_value=[0.1] * 768)
+
+    success_count, fail_count = await processor.process_jobs(limit=10, skip_llm_validation=True)
+
+    assert success_count == 1
+    assert fail_count == 0
+
+
+@pytest.mark.asyncio
+async def test_process_jobs_skip_llm_validation_still_fails_heuristics(test_db_session, repo, processor, mocker):
+    repo.save_raw_job({
+        "url": "https://example.com/job/skip-validation-fail",
+        "title": "Short",
+        "company": "Tiny Co",
+        "location": "VN",
+        "raw_markdown": "Too short",
+        "status": "pending",
+    })
+
+    mocker.patch.object(JobValidator, "heuristic_check", return_value=False)
+    mocker.patch.object(JobValidator, "validate_with_llm", side_effect=AssertionError("LLM validation should not be called on heuristic failure"))
+
+    success_count, fail_count = await processor.process_jobs(limit=10, skip_llm_validation=True)
+
+    assert success_count == 0
+    assert fail_count == 1
+
+    raw_job = test_db_session.query(RawJobDB).filter_by(url="https://example.com/job/skip-validation-fail").first()
+    assert raw_job.status == "failed"
+
+    audit_row = get_latest_audit_row(test_db_session)
+    assert audit_row is not None
+    assert audit_row.error_type == "VALIDATION_FAILED"
 
 
 @pytest.mark.asyncio
@@ -199,3 +391,62 @@ async def test_process_jobs_llm_incomplete_failure_is_audited(test_db_session, r
     assert audit_row is not None
     assert audit_row.error_type == "LLM_INCOMPLETE"
     assert "Missing critical fields (title/description) in LLM output" in audit_row.error_message
+
+
+@pytest.mark.asyncio
+async def test_process_jobs_prioritizes_refreshed_current_run_jobs(test_db_session, repo, processor, mocker):
+    repo.save_raw_job({
+        "url": "https://example.com/job/older-pending-process",
+        "title": "Older Pending Process",
+        "raw_markdown": "This is a dummy job description containing over 300 characters. " * 10,
+        "status": "pending",
+    })
+    repo.save_raw_job({
+        "url": "https://example.com/job/current-run-process",
+        "title": "Current Run Process",
+        "raw_markdown": "This is a dummy job description containing over 300 characters. " * 10,
+        "status": "pending",
+    })
+    repo.save_raw_job({
+        "url": "https://example.com/job/current-run-process",
+        "title": "Current Run Process Refreshed",
+        "raw_markdown": "This is a dummy job description containing over 300 characters. " * 10,
+        "status": "pending",
+        "extraction_method": "raw",
+    })
+
+    mocker.patch("src.internhunter.extraction.validator.JobValidator.is_valid", return_value=(True, ""))
+    mocker.patch(
+        "src.internhunter.extraction.job_processor.llm_router.process_with_fallback",
+        side_effect=lambda job: ProcessedJob(
+            standardized_title=job.title,
+            job_level="Mid",
+            is_internship=False,
+            cities=["Hanoi"],
+            experience=2.0,
+            min_gpa=None,
+            english_requirement=None,
+            salary_min=None,
+            salary_max=None,
+            currency="VND",
+            is_salary_negotiable=False,
+            tech_stack=["Python"],
+            technical_competencies=["Build APIs"],
+            domain_knowledge=["Web Development"],
+            description=f"Processed {job.title}",
+            requirement="Python, APIs, testing",
+            benefit="Flexible work",
+        ),
+    )
+    mocker.patch("src.internhunter.embeddings.embedder.Embedder.generate_embedding", return_value=[0.1] * 768)
+
+    success_count, fail_count = await processor.process_jobs(limit=1)
+
+    assert success_count == 1
+    assert fail_count == 0
+
+    current_run_job = test_db_session.query(RawJobDB).filter_by(url="https://example.com/job/current-run-process").first()
+    older_job = test_db_session.query(RawJobDB).filter_by(url="https://example.com/job/older-pending-process").first()
+
+    assert current_run_job.status == "completed"
+    assert older_job.status == "pending"

@@ -121,3 +121,45 @@ def test_canonical_etl_repository_filters_existing_links(test_db_session):
 
     assert len(filtered) == 1
     assert filtered[0]["url"] == "https://example.com/job/dedup-new"
+
+
+def test_canonical_etl_repository_prioritizes_refreshed_pending_jobs(test_db_session):
+    repo = NewETLRepository()
+    assert repo.save_raw_job(
+        {
+            "url": "https://example.com/job/older-pending",
+            "title": "Older Pending",
+            "company": "Boundary Co",
+            "location": "Remote",
+            "full_json_dump": {"foo": "bar"},
+            "status": "pending",
+        }
+    )
+    assert repo.save_raw_job(
+        {
+            "url": "https://example.com/job/current-run",
+            "title": "Current Run",
+            "company": "Boundary Co",
+            "location": "Remote",
+            "full_json_dump": {"foo": "bar"},
+            "status": "pending",
+        }
+    )
+    assert repo.save_raw_job(
+        {
+            "url": "https://example.com/job/current-run",
+            "title": "Current Run Refreshed",
+            "company": "Boundary Co",
+            "location": "Remote",
+            "full_json_dump": {"foo": "bar"},
+            "status": "pending",
+            "extraction_method": "raw",
+            "raw_markdown": "refreshed",
+        }
+    )
+
+    pending_jobs = repo.fetch_pending_raw_jobs(limit=1)
+
+    assert len(pending_jobs) == 1
+    assert pending_jobs[0].url == "https://example.com/job/current-run"
+    assert pending_jobs[0].retry_count == 1

@@ -184,7 +184,12 @@ class ETLRepository:
         """Fetches jobs that are 'pending' and need processing."""
         with SessionLocal() as session:
             try:
-                statement = select(RawJobDB).where(RawJobDB.status == "pending").limit(limit)
+                statement = (
+                    select(RawJobDB)
+                    .where(RawJobDB.status == "pending")
+                    .order_by(RawJobDB.retry_count.desc(), RawJobDB.id.desc())
+                    .limit(limit)
+                )
                 results = session.execute(statement).scalars().all()
                 return [self._row_to_raw_job(row) for row in results]
             except Exception as e:

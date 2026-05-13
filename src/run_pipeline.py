@@ -9,9 +9,9 @@ if __package__ in (None, ""):
 from src.internhunter.orchestration.ingestion_flow import job_ingestion_flow
 
 
-async def run_full_pipeline(limit: int = 10, force_recrawl: bool = False):
+async def run_full_pipeline(limit: int = 10, force_recrawl: bool = False, skip_llm_validation: bool = False):
     """Compatibility alias for the current ingestion flow."""
-    await job_ingestion_flow(limit=limit, force_recrawl=force_recrawl)
+    await job_ingestion_flow(limit=limit, force_recrawl=force_recrawl, skip_llm_validation=skip_llm_validation)
 
 
 if __name__ == "__main__":
@@ -27,6 +27,17 @@ if __name__ == "__main__":
         action="store_true",
         help="Dev-only option to re-crawl already-seen links for local MVP testing",
     )
+    parser.add_argument(
+        "--skip-llm-validation",
+        action="store_true",
+        help="Dev-only option to skip Gemini validation and use heuristics only",
+    )
     args = parser.parse_args()
 
-    asyncio.run(job_ingestion_flow(limit=args.limit, force_recrawl=args.force_recrawl))
+    asyncio.run(
+        job_ingestion_flow(
+            limit=args.limit,
+            force_recrawl=args.force_recrawl,
+            skip_llm_validation=args.skip_llm_validation,
+        )
+    )

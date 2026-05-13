@@ -1,4 +1,5 @@
 import asyncio
+import json
 import time
 
 from src.internhunter.llm.router import llm_router
@@ -8,6 +9,100 @@ from src.config.settings import settings
 from src.infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
+
+_VALIDATION_PRIORITY_KEYS = (
+    "title",
+    "company",
+    "location",
+    "salary",
+    "experience",
+    "info",
+    "description",
+    "requirement",
+    "benefit",
+)
+_VALIDATION_NOISY_KEYS = {
+    "error",
+    "is_blocked",
+    "blocked_reason",
+    "retry_count",
+    "status",
+    "extraction_method",
+    "created_at",
+    "updated_at",
+}
+
+
+def _iter_useful_text(value, *, key: str | None = None, depth: int = 0, max_depth: int = 4):
+    """Yield readable text fragments from nested job payloads."""
+    if value is None or depth > max_depth:
+        return
+
+    if isinstance(value, str):
+        text = value.strip()
+        if text:
+            try:
+                parsed = json.loads(text)
+            except Exception:
+                yield text
+            else:
+                if isinstance(parsed, (dict, list)):
+                    yield from _iter_useful_text(parsed, key=key, depth=depth + 1, max_depth=max_depth)
+                else:
+                    parsed_text = str(parsed).strip()
+                    if parsed_text:
+                        yield parsed_text
+        return
+
+    if isinstance(value, (int, float, bool)):
+        return
+
+    if isinstance(value, list):
+        for item in value:
+            yield from _iter_useful_text(item, key=key, depth=depth + 1, max_depth=max_depth)
+        return
+
+    if isinstance(value, dict):
+        keys = list(value.keys())
+        ordered_keys = [k for k in _VALIDATION_PRIORITY_KEYS if k in value]
+        ordered_keys.extend(
+            k for k in keys
+            if k not in ordered_keys and k not in _VALIDATION_NOISY_KEYS
+        )
+
+        for child_key in ordered_keys:
+            yield from _iter_useful_text(
+                value.get(child_key),
+                key=child_key,
+                depth=depth + 1,
+                max_depth=max_depth,
+            )
+
+
+def build_validation_text(job) -> str:
+    """Build readable validation text from raw job fields and extracted payloads."""
+    parts = []
+
+    for field_name in ("title", "company", "location"):
+        value = getattr(job, field_name, None)
+        if value:
+            text = str(value).strip()
+            if text:
+                parts.append(text)
+
+    raw_markdown = getattr(job, "raw_markdown", None)
+    if raw_markdown:
+        raw_text = str(raw_markdown).strip()
+        if raw_text:
+            parts.append(raw_text)
+
+    full_json_dump = getattr(job, "full_json_dump", None)
+    if full_json_dump:
+        for fragment in _iter_useful_text(full_json_dump):
+            if fragment and fragment not in parts:
+                parts.append(fragment)
+
+    return "\n".join(parts)
 
 
 class JobProcessor():
@@ -39,7 +134,7 @@ class JobProcessor():
             parts.append(f"Domain: {', '.join(parsed_result.domain_knowledge)}")
         return "\n".join(parts)
 
-    async def process_jobs(self, limit: int = 100):
+    async def process_jobs(self, limit: int = 100, skip_llm_validation: bool = False):
         """Process pending raw jobs through validation, LLM transformation, embedding, and loading.
         
         Async with smart rate limiting: only sleeps the remaining interval after
@@ -48,7 +143,9 @@ class JobProcessor():
         Returns:
             (success_count, fail_count)
         """
-        logger.info("Job processing cycle starting", limit=limit)
+        logger.info("Job processing cycle starting", limit=limit, skip_llm_validation=skip_llm_validation)
+        if skip_llm_validation:
+            logger.warning("LLM validation skipped in local/dev mode", limit=limit)
 
         from src.services.job_processor.validator import JobValidator
         validator = JobValidator()
@@ -56,6 +153,14 @@ class JobProcessor():
         
         # Use new production-grade fetch
         jobs = repo.fetch_pending_raw_jobs(limit=limit)
+        logger.info(
+            "Pending raw jobs selected",
+            limit=limit,
+            count=len(jobs),
+            raw_job_ids=[job.id for job in jobs],
+            urls=[job.url for job in jobs],
+            retry_counts=[job.retry_count for job in jobs],
+        )
 
         success_count = 0
         fail_count = 0
@@ -69,8 +174,16 @@ class JobProcessor():
 
             try:
                 # Step 1: Validation Guardrail (Heuristics + LLM-Lite)
-                raw_text = job.raw_markdown or str(job.full_json_dump)
-                is_valid, reason = validator.is_valid(raw_text)
+                raw_text = build_validation_text(job)
+                if skip_llm_validation:
+                    if not validator.heuristic_check(raw_text):
+                        is_valid = False
+                        reason = "Heuristic check failed: text too short or lacks job keywords."
+                    else:
+                        is_valid = True
+                        reason = "LLM validation skipped in local/dev mode"
+                else:
+                    is_valid, reason = validator.is_valid(raw_text)
                 
                 if not is_valid:
                     logger.warning("Job rejected by validator", url=job.url, reason=reason)

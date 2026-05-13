@@ -63,7 +63,9 @@ def test_blocked_or_empty_fixture_is_expected_failure():
     assert payload["required_missing_fields"] == ["standardized_title", "description"]
 
     blocked_html = (FIXTURE_DIR / "blocked_or_empty.html").read_text(encoding="utf-8")
-    assert "Verify you are human" in blocked_html
+    assert "Sorry, you have been blocked" in blocked_html
+    assert "Please enable cookies" in blocked_html
+    assert "Cloudflare Ray ID" in blocked_html
     assert "Access Denied" in blocked_html
 
 

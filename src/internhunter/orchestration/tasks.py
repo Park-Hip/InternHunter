@@ -68,10 +68,10 @@ async def acquire_job_task(url: str, run_id: str) -> bool:
 
 
 @task
-async def process_pending_jobs_task(limit: int = 100):
+async def process_pending_jobs_task(limit: int = 100, skip_llm_validation: bool = False):
     """Orchestrates Validation, Transformation, and Loading for all pending jobs."""
     processor = JobProcessor()
-    await processor.process_jobs(limit=limit)
+    await processor.process_jobs(limit=limit, skip_llm_validation=skip_llm_validation)
 
 
 __all__ = ["fetch_job_links_task", "acquire_job_task", "process_pending_jobs_task"]

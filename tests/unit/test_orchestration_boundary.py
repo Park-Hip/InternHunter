@@ -30,7 +30,14 @@ def test_orchestration_imports_resolve():
 
 @pytest.mark.asyncio
 async def test_job_ingestion_flow_limits_crawl_to_requested_job_count(mocker):
-    captured = {"fetch_limit": None, "crawl_count": None, "process_limit": None, "force_recrawl": None, "crawl_force_recrawl": None}
+    captured = {
+        "fetch_limit": None,
+        "crawl_count": None,
+        "process_limit": None,
+        "force_recrawl": None,
+        "crawl_force_recrawl": None,
+        "skip_llm_validation": None,
+    }
 
     async def fake_fetch_links_task(run_id, limit=None, force_recrawl=False):
         captured["fetch_limit"] = limit
@@ -52,8 +59,9 @@ async def test_job_ingestion_flow_limits_crawl_to_requested_job_count(mocker):
         captured["crawl_force_recrawl"] = force_recrawl
         return len(links), 0
 
-    async def fake_process_jobs_task(limit):
+    async def fake_process_jobs_task(limit, skip_llm_validation=False):
         captured["process_limit"] = limit
+        captured["skip_llm_validation"] = skip_llm_validation
         return 3, 0
 
     class DummyRepo:
@@ -69,13 +77,14 @@ async def test_job_ingestion_flow_limits_crawl_to_requested_job_count(mocker):
     mocker.patch.object(ingestion_flow_module, "process_jobs_task", side_effect=fake_process_jobs_task)
     mocker.patch.object(ingestion_flow_module, "ETLRepository", return_value=DummyRepo())
 
-    await canonical_ingestion_flow(limit=3, force_recrawl=True)
+    await canonical_ingestion_flow(limit=3, force_recrawl=True, skip_llm_validation=True)
 
     assert captured["fetch_limit"] == 3
     assert captured["force_recrawl"] is True
     assert captured["crawl_count"] == 3
     assert captured["crawl_force_recrawl"] is True
     assert captured["process_limit"] == 3
+    assert captured["skip_llm_validation"] is True
 
 
 @pytest.mark.asyncio
@@ -95,7 +104,7 @@ async def test_job_ingestion_flow_skips_when_no_new_links_after_dedup(mocker):
         captured["crawl_called"] = True
         return len(links), 0
 
-    async def fake_process_jobs_task(limit):
+    async def fake_process_jobs_task(limit, skip_llm_validation=False):
         captured["process_called"] = True
         return 0, 0
 
@@ -136,7 +145,7 @@ async def test_job_ingestion_flow_skips_when_fetch_links_fails(mocker):
         captured["crawl_called"] = True
         return len(links), 0
 
-    async def fake_process_jobs_task(limit):
+    async def fake_process_jobs_task(limit, skip_llm_validation=False):
         captured["process_called"] = True
         return 0, 0
 

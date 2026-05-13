@@ -30,18 +30,20 @@ async def crawl_jobs_task(links, run_id: str, force_recrawl: bool = False) -> tu
 
 
 @task
-async def process_jobs_task(limit: int):
+async def process_jobs_task(limit: int, skip_llm_validation: bool = False):
     logger.info("Task: Processing unstructured jobs")
     processor = JobProcessor()
-    return await processor.process_jobs(limit=limit)
+    return await processor.process_jobs(limit=limit, skip_llm_validation=skip_llm_validation)
 
 
 @flow(name="Job Ingestion Flow")
-async def job_ingestion_flow(limit: int = 20, force_recrawl: bool = False):
+async def job_ingestion_flow(limit: int = 20, force_recrawl: bool = False, skip_llm_validation: bool = False):
     configure_logging()
     run_id = str(uuid.uuid4())[:8]
     if force_recrawl:
         logger.warning("Force-recrawl mode enabled for local MVP slice", run_id=run_id, limit=limit)
+    if skip_llm_validation:
+        logger.warning("LLM validation skipped in local/dev mode", run_id=run_id, limit=limit)
 
     repo = ETLRepository()
     repo.create_tables()
@@ -60,7 +62,7 @@ async def job_ingestion_flow(limit: int = 20, force_recrawl: bool = False):
     if outcome.is_success and outcome.links:
         crawl_links = outcome.links[:limit] if limit is not None else outcome.links
         extracted, extract_failed = await crawl_jobs_task(crawl_links, run_id, force_recrawl=force_recrawl)
-        processed, process_failed = await process_jobs_task(limit=limit)
+        processed, process_failed = await process_jobs_task(limit=limit, skip_llm_validation=skip_llm_validation)
 
         repo.save_pipeline_run_summary(
             run_id=run_id,
