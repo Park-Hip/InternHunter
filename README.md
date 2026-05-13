@@ -5,6 +5,7 @@ InternHunter is a TopCV-focused job-finder backend that crawls jobs, stores raw 
 ## Current MVP Backend Capabilities
 
 - TopCV crawl -> `raw_jobs`
+- `raw_jobs.crawl_run_id` stamps each crawl snapshot with the current run
 - `raw_jobs` -> `clean_jobs`
 - `clean_jobs` -> embeddings
 - DB-only search
@@ -21,6 +22,12 @@ Make sure PostgreSQL is running and set:
 
 - `DB_URL`
 - Gemini API key for embeddings and resume matching
+
+If your local database is missing the latest columns, run:
+
+```powershell
+uv run python src/scripts/upgrade_db.py
+```
 
 ### 2. Run a small ETL slice
 

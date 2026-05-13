@@ -7,13 +7,14 @@ This document captures the current working backend MVP path, the local smoke com
 The following backend slices are working end to end in the local environment:
 
 1. TopCV crawl -> `raw_jobs`
-2. `raw_jobs` -> `clean_jobs`
-3. `clean_jobs` -> embeddings
-4. DB-only search
-5. Semantic search
-6. Resume upload -> embedding
-7. Resume matching -> jobs
-8. API demo
+2. `raw_jobs.crawl_run_id` stamps each crawl snapshot with the current run
+3. `raw_jobs` -> `clean_jobs`
+4. `clean_jobs` -> embeddings
+5. DB-only search
+6. Semantic search
+7. Resume upload -> embedding
+8. Resume matching -> jobs
+9. API demo
 
 ## Supported Local Commands
 
@@ -23,6 +24,14 @@ Runs a small, dev-safe slice with crawl recrawl enabled and LLM validation disab
 
 ```powershell
 uv run python src/run_pipeline.py --limit 3 --force-recrawl --skip-llm-validation
+```
+
+This slice stamps each saved raw job with the current `crawl_run_id` and processes only that run's pending raw jobs, which makes local MVP runs deterministic.
+
+### Schema upgrade
+
+```powershell
+uv run python src/scripts/upgrade_db.py
 ```
 
 ### Semantic search smoke
@@ -93,6 +102,9 @@ The MVP backend works, but the following limitations are still known:
 8. `/jobs/search` supports both criteria and semantic modes; semantic mode depends on the Gemini embedding key/quota.
 9. `/resume/match` needs a Gemini embedding key.
 10. There is no auth.
+11. This is not full raw-job versioning; the same URL still maps to one refreshed raw row.
+12. Older raw rows may still have `crawl_run_id = NULL`.
+13. Global processing can still run without `crawl_run_id` when you want legacy backlog behavior.
 
 ## Verification Commands
 

@@ -9,6 +9,11 @@ Before starting, make sure:
 1. PostgreSQL is running.
 2. `DB_URL` is set.
 3. A Gemini API key is available for embeddings and resume matching.
+4. If your local DB is missing the latest columns, run:
+
+```powershell
+uv run python src/scripts/upgrade_db.py
+```
 
 ## 2. Run the ETL Slice
 
@@ -18,6 +23,8 @@ Run a small dev-safe ETL slice:
 uv run python src/run_pipeline.py --limit 3 --force-recrawl --skip-llm-validation
 ```
 
+This slice stamps each saved raw job with `crawl_run_id` and processes only the pending raw jobs from the current run, which makes local MVP runs deterministic.
+
 ## 3. Verify Data
 
 Check the main pipeline tables.
@@ -25,7 +32,7 @@ Check the main pipeline tables.
 ### raw_jobs
 
 ```sql
-SELECT id, url, title, status, extraction_method, retry_count, created_at
+SELECT id, url, crawl_run_id, title, status, extraction_method, retry_count, created_at
 FROM raw_jobs
 ORDER BY id DESC
 LIMIT 10;
@@ -121,6 +128,7 @@ The most likely failure points are:
 3. No `clean_jobs` rows exist yet.
 4. No embeddings exist yet in `clean_jobs`.
 5. `match_score` is meaningful in semantic mode, but criteria mode still uses exact/fallback behavior.
+6. Older raw rows may have `crawl_run_id = NULL` until they are refreshed by a new crawl run.
 
 ## 9. What “MVP Success” Means
 

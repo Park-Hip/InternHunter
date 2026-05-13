@@ -27,6 +27,7 @@ Flow:
 
 TopCV crawl
 -> raw_jobs
+-> crawl_run_id
 -> clean_jobs
 -> embeddings
 -> search
@@ -44,14 +45,16 @@ uv run python src/run_pipeline.py --limit 3 --force-recrawl --skip-llm-validatio
 ```
 
 What to say:
-- “I’m running a small local ETL slice so we can see the full pipeline without a large crawl.”
-- “This fetches a few TopCV jobs, stores raw snapshots, and processes only a tiny batch.”
+- "I’m running a small local ETL slice so we can see the full pipeline without a large crawl."
+- "This fetches a few TopCV jobs, stores raw snapshots, and processes only a tiny batch."
+- "Each raw job is stamped with the current crawl_run_id, so this run only processes jobs from this crawl."
 
 What the output proves:
 - Crawling works.
 - Raw job persistence works.
 - Clean job processing works.
 - The pipeline can run in a local dev-safe mode.
+- The run is deterministic instead of picking older backlog jobs first.
 
 Success looks like:
 - Raw jobs are saved.
@@ -65,7 +68,7 @@ Use these SQL queries:
 `raw_jobs`
 
 ```sql
-SELECT id, url, title, status, extraction_method, retry_count, created_at
+SELECT id, url, crawl_run_id, title, status, extraction_method, retry_count, created_at
 FROM raw_jobs
 ORDER BY id DESC
 LIMIT 10;
@@ -200,6 +203,8 @@ Be direct about the current rough edges:
 - `--force-recrawl` is dev-only.
 - `--skip-llm-validation` is dev-only.
 - Criteria mode is the default for `/jobs/search`; semantic mode is explicit and depends on Gemini.
+- This is not full raw-job versioning; the same URL still maps to one refreshed raw row.
+- Older raw rows may still have `crawl_run_id = NULL`.
 
 ## 5. Strong Closing Summary
 
