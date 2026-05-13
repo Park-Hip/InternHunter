@@ -45,6 +45,45 @@ def test_jobs_search_endpoint_returns_mocked_results(monkeypatch):
     ]
 
 
+def test_jobs_search_endpoint_semantic_mode_uses_embedding_and_similarity_search(monkeypatch):
+    captured = {}
+
+    monkeypatch.setattr(demo_routes.embedder, "generate_embedding", lambda query: [0.1, 0.2, 0.3])
+
+    def fake_similarity_search(embedding, limit=5):
+        captured["embedding"] = embedding
+        captured["limit"] = limit
+        return [
+            {
+                "title": "Semantic Match",
+                "company": "TopCV",
+                "cities": ["Hanoi"],
+                "url": "https://example.com/job/semantic",
+                "match_score": 0.93,
+            }
+        ]
+
+    monkeypatch.setattr(demo_routes.search_repo, "search_jobs_by_similarity", fake_similarity_search)
+
+    response = client.get(
+        "/jobs/search",
+        params={"query": "python machine learning", "limit": 5, "mode": "semantic"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "title": "Semantic Match",
+            "company": "TopCV",
+            "cities": ["Hanoi"],
+            "url": "https://example.com/job/semantic",
+            "match_score": 0.93,
+        }
+    ]
+    assert captured["embedding"] == [0.1, 0.2, 0.3]
+    assert captured["limit"] == 5
+
+
 def test_jobs_search_endpoint_handles_empty_results(monkeypatch):
     monkeypatch.setattr(demo_routes.search_repo, "search_jobs_by_criteria", lambda **kwargs: [])
     monkeypatch.setattr(demo_routes, "_get_recent_clean_jobs", lambda limit: [])
@@ -53,6 +92,28 @@ def test_jobs_search_endpoint_handles_empty_results(monkeypatch):
 
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_jobs_search_endpoint_invalid_mode_returns_400():
+    response = client.get("/jobs/search", params={"query": "data scientist", "limit": 5, "mode": "vector"})
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "mode must be either 'criteria' or 'semantic'."
+
+
+def test_jobs_search_endpoint_semantic_embedding_failure_returns_500(monkeypatch):
+    def boom(query):
+        raise RuntimeError("gemini offline")
+
+    monkeypatch.setattr(demo_routes.embedder, "generate_embedding", boom)
+
+    response = client.get(
+        "/jobs/search",
+        params={"query": "python machine learning", "limit": 5, "mode": "semantic"},
+    )
+
+    assert response.status_code == 500
+    assert response.json()["detail"] == "Failed to generate query embedding."
 
 
 def test_resume_match_endpoint_rejects_empty_resume_text():

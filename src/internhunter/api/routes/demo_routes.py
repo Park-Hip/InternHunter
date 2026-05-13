@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import desc, select, text
 
 from src.internhunter.common.logging import get_logger
+from src.internhunter.embeddings import embedder
 from src.internhunter.search.repository import SearchRepository
 from src.internhunter.resume import execute_match_resume, execute_upload_resume
 from src.internhunter.storage.models import CleanJobDB, RawJobDB
@@ -67,7 +68,26 @@ def health() -> dict[str, str]:
 
 
 @router.get("/jobs/search")
-def search_jobs(query: str = "data scientist", limit: int = 5) -> list[dict[str, Any]]:
+def search_jobs(query: str = "data scientist", limit: int = 5, mode: str = "criteria") -> list[dict[str, Any]]:
+    normalized_mode = (mode or "criteria").strip().lower()
+    if normalized_mode not in {"criteria", "semantic"}:
+        raise HTTPException(status_code=400, detail="mode must be either 'criteria' or 'semantic'.")
+
+    if normalized_mode == "semantic":
+        query_text = query.strip() or "data scientist"
+        try:
+            query_embedding = embedder.generate_embedding(query_text)
+        except Exception as exc:
+            logger.error("jobs_search semantic embedding failed", error=str(exc))
+            raise HTTPException(status_code=500, detail="Failed to generate query embedding.")
+
+        try:
+            results = search_repo.search_jobs_by_similarity(query_embedding, limit=limit)
+        except Exception as exc:
+            logger.error("jobs_search semantic search failed", error=str(exc))
+            raise HTTPException(status_code=500, detail="Failed to search jobs semantically.")
+        return results
+
     normalized = query.strip()
     search_terms = [normalized]
     if normalized:
