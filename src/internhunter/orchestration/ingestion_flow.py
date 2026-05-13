@@ -13,20 +13,20 @@ logger = get_logger(__name__)
 
 
 @task(retries=3, retry_delay_seconds=60)
-async def fetch_links_task(run_id: str, limit: int | None = None) -> FetchOutcome:
+async def fetch_links_task(run_id: str, limit: int | None = None, force_recrawl: bool = False) -> FetchOutcome:
     logger.info("Task: Fetching job links")
     crawler = Crawler()
-    return await crawler.fetch_job_links(run_id, limit=limit)
+    return await crawler.fetch_job_links(run_id, limit=limit, force_recrawl=force_recrawl)
 
 
 @task(retries=2, retry_delay_seconds=300)
-async def crawl_jobs_task(links, run_id: str) -> tuple[int, int]:
+async def crawl_jobs_task(links, run_id: str, force_recrawl: bool = False) -> tuple[int, int]:
     if not links:
         logger.info("No new links to crawl.")
         return 0, 0
     logger.info(f"Task: Crawling {len(links)} jobs")
     crawler = Crawler()
-    return await crawler.crawl_jobs(links, run_id)
+    return await crawler.crawl_jobs(links, run_id, force_recrawl=force_recrawl)
 
 
 @task
@@ -37,14 +37,16 @@ async def process_jobs_task(limit: int):
 
 
 @flow(name="Job Ingestion Flow")
-async def job_ingestion_flow(limit: int = 20):
+async def job_ingestion_flow(limit: int = 20, force_recrawl: bool = False):
     configure_logging()
     run_id = str(uuid.uuid4())[:8]
+    if force_recrawl:
+        logger.warning("Force-recrawl mode enabled for local MVP slice", run_id=run_id, limit=limit)
 
     repo = ETLRepository()
     repo.create_tables()
 
-    outcome = await fetch_links_task(run_id, limit=limit)
+    outcome = await fetch_links_task(run_id, limit=limit, force_recrawl=force_recrawl)
     logger.info(
         "Fetch links completed",
         run_id=run_id,
@@ -57,7 +59,7 @@ async def job_ingestion_flow(limit: int = 20):
 
     if outcome.is_success and outcome.links:
         crawl_links = outcome.links[:limit] if limit is not None else outcome.links
-        extracted, extract_failed = await crawl_jobs_task(crawl_links, run_id)
+        extracted, extract_failed = await crawl_jobs_task(crawl_links, run_id, force_recrawl=force_recrawl)
         processed, process_failed = await process_jobs_task(limit=limit)
 
         repo.save_pipeline_run_summary(

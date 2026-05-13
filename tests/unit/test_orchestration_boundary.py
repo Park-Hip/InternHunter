@@ -30,10 +30,11 @@ def test_orchestration_imports_resolve():
 
 @pytest.mark.asyncio
 async def test_job_ingestion_flow_limits_crawl_to_requested_job_count(mocker):
-    captured = {"fetch_limit": None, "crawl_count": None, "process_limit": None}
+    captured = {"fetch_limit": None, "crawl_count": None, "process_limit": None, "force_recrawl": None, "crawl_force_recrawl": None}
 
-    async def fake_fetch_links_task(run_id, limit=None):
+    async def fake_fetch_links_task(run_id, limit=None, force_recrawl=False):
         captured["fetch_limit"] = limit
+        captured["force_recrawl"] = force_recrawl
         return FetchOutcome(
             status=FetchStatus.SUCCESS,
             links=[
@@ -46,8 +47,9 @@ async def test_job_ingestion_flow_limits_crawl_to_requested_job_count(mocker):
             pages_scraped=1,
         )
 
-    async def fake_crawl_jobs_task(links, run_id):
+    async def fake_crawl_jobs_task(links, run_id, force_recrawl=False):
         captured["crawl_count"] = len(links)
+        captured["crawl_force_recrawl"] = force_recrawl
         return len(links), 0
 
     async def fake_process_jobs_task(limit):
@@ -67,10 +69,12 @@ async def test_job_ingestion_flow_limits_crawl_to_requested_job_count(mocker):
     mocker.patch.object(ingestion_flow_module, "process_jobs_task", side_effect=fake_process_jobs_task)
     mocker.patch.object(ingestion_flow_module, "ETLRepository", return_value=DummyRepo())
 
-    await canonical_ingestion_flow(limit=3)
+    await canonical_ingestion_flow(limit=3, force_recrawl=True)
 
     assert captured["fetch_limit"] == 3
+    assert captured["force_recrawl"] is True
     assert captured["crawl_count"] == 3
+    assert captured["crawl_force_recrawl"] is True
     assert captured["process_limit"] == 3
 
 
@@ -78,7 +82,7 @@ async def test_job_ingestion_flow_limits_crawl_to_requested_job_count(mocker):
 async def test_job_ingestion_flow_skips_when_no_new_links_after_dedup(mocker):
     captured = {"fetch_limit": None, "crawl_called": False, "process_called": False}
 
-    async def fake_fetch_links_task(run_id, limit=None):
+    async def fake_fetch_links_task(run_id, limit=None, force_recrawl=False):
         captured["fetch_limit"] = limit
         return FetchOutcome(
             status=FetchStatus.NO_NEW,
@@ -87,7 +91,7 @@ async def test_job_ingestion_flow_skips_when_no_new_links_after_dedup(mocker):
             pages_scraped=2,
         )
 
-    async def fake_crawl_jobs_task(links, run_id):
+    async def fake_crawl_jobs_task(links, run_id, force_recrawl=False):
         captured["crawl_called"] = True
         return len(links), 0
 
@@ -119,7 +123,7 @@ async def test_job_ingestion_flow_skips_when_no_new_links_after_dedup(mocker):
 async def test_job_ingestion_flow_skips_when_fetch_links_fails(mocker):
     captured = {"crawl_called": False, "process_called": False}
 
-    async def fake_fetch_links_task(run_id, limit=None):
+    async def fake_fetch_links_task(run_id, limit=None, force_recrawl=False):
         return FetchOutcome(
             status=FetchStatus.NETWORK_FAIL,
             links=[],
@@ -128,7 +132,7 @@ async def test_job_ingestion_flow_skips_when_fetch_links_fails(mocker):
             error="network down",
         )
 
-    async def fake_crawl_jobs_task(links, run_id):
+    async def fake_crawl_jobs_task(links, run_id, force_recrawl=False):
         captured["crawl_called"] = True
         return len(links), 0
 

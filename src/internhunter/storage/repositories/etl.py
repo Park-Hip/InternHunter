@@ -93,9 +93,34 @@ class ETLRepository:
         return new_links
 
     def save_raw_job(self, job_data: Dict[str, Any]) -> bool:
-        """Saves a single raw job to the database."""
+        """Saves a single raw job to the database.
+
+        If the URL already exists, refresh the existing snapshot instead of failing.
+        """
         with SessionLocal() as session:
             try:
+                existing = session.execute(
+                    select(RawJobDB).where(RawJobDB.url == job_data["url"])
+                ).scalar_one_or_none()
+
+                if existing:
+                    existing.title = job_data.get("title")
+                    existing.company = job_data.get("company")
+                    existing.location = job_data.get("location")
+                    existing.full_json_dump = job_data.get("full_json_dump")
+                    existing.status = job_data.get("status", existing.status or "pending")
+                    existing.extraction_method = job_data.get("extraction_method", existing.extraction_method or "css")
+                    existing.raw_markdown = job_data.get("raw_markdown")
+                    existing.retry_count = (existing.retry_count or 0) + 1
+                    session.commit()
+                    logger.info(
+                        "Existing raw job refreshed",
+                        url=job_data.get("url"),
+                        raw_job_id=existing.id,
+                        retry_count=existing.retry_count,
+                    )
+                    return True
+
                 raw_job = RawJobDB(
                     url=job_data["url"],
                     title=job_data.get("title"),

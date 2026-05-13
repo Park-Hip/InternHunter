@@ -28,6 +28,26 @@ class DummyAsyncWebCrawler:
         return False
 
 
+class DummyExtraction:
+    def __init__(self, url: str):
+        self.status = "pending"
+        self.screenshot = None
+        self.html = f"<html><body>{url}</body></html>"
+        self._url = url
+
+    def to_save_dict(self):
+        return {
+            "url": self._url,
+            "title": "Title",
+            "company": "Company",
+            "location": "Location",
+            "full_json_dump": {"title": "Title"},
+            "status": self.status,
+            "extraction_method": "css",
+            "raw_markdown": None,
+        }
+
+
 @pytest.mark.asyncio
 async def test_extract_single_job_returns_pending_raw_extraction_for_normal_topcv_fixture(mocker):
     html = (FIXTURE_DIR / "normal_job.html").read_text(encoding="utf-8")
@@ -159,3 +179,89 @@ async def test_fetch_job_links_stops_after_requested_limit(mocker):
     assert outcome.total_scraped == 3
     assert outcome.pages_scraped == 3
     assert mock_fetch.call_count == 3
+
+
+@pytest.mark.asyncio
+async def test_fetch_job_links_force_recrawl_skips_dedup_filtering(mocker):
+    crawler = Crawler()
+    crawler.search_urls = ["https://example.com/search"]
+    crawler.max_pages = 10
+
+    async def fake_fetch_single_page(crawler_obj, url):
+        page_num = 1
+        if "page=" in url:
+            page_num = int(url.split("page=")[-1])
+        return (
+            [
+                {
+                    "url": f"https://example.com/job/{page_num}",
+                    "scraped_at": "2026-01-01T00:00:00Z",
+                    "source": "topcv",
+                }
+            ],
+            None,
+        )
+
+    mocker.patch("src.services.crawler.crawl.AsyncWebCrawler", return_value=DummyAsyncWebCrawler())
+    mocker.patch.object(Crawler, "_fetch_single_page", side_effect=fake_fetch_single_page)
+    mocker.patch("src.services.crawler.crawl.ETLRepository.filter_new_links", side_effect=AssertionError("dedup should be bypassed in force-recrawl mode"))
+
+    outcome = await crawler.fetch_job_links("run-force-recrawl", limit=3, force_recrawl=True)
+
+    assert outcome.is_success
+    assert len(outcome.links) == 3
+    assert outcome.total_scraped == 3
+    assert outcome.pages_scraped == 3
+
+
+@pytest.mark.asyncio
+async def test_crawl_jobs_force_recrawl_skips_defensive_dedup_recheck(mocker):
+    crawler = Crawler()
+    mocker.patch("src.services.crawler.crawl.AsyncWebCrawler", return_value=DummyAsyncWebCrawler())
+    mocker.patch("src.services.crawler.crawl.ETLRepository.get_raw_jobs_count", return_value=0)
+    mocker.patch("src.services.crawler.crawl.ETLRepository.filter_new_links", side_effect=AssertionError("dedup should be bypassed in force-recrawl mode"))
+    mocker.patch("src.services.crawler.crawl.ETLRepository.save_raw_job", return_value=True)
+    mocker.patch("src.services.crawler.crawl.ETLRepository.save_to_audit", return_value=True)
+    mocker.patch.object(Crawler, "extract_single_job", return_value=DummyExtraction("https://example.com/job/force"))
+
+    saved, failed = await crawler.crawl_jobs([{"url": "https://example.com/job/force"}], "run-force-recrawl", force_recrawl=True)
+
+    assert saved == 1
+    assert failed == 0
+
+
+@pytest.mark.asyncio
+async def test_crawl_jobs_force_recrawl_refreshes_duplicate_raw_job_without_collision(mocker, test_db_session):
+    from src.infrastructure.db.models import RawJobDB
+    from src.internhunter.storage.repositories.etl import ETLRepository
+
+    crawler = Crawler()
+    repo = ETLRepository()
+    existing_url = "https://example.com/job/force-refresh"
+    assert repo.save_raw_job(
+        {
+            "url": existing_url,
+            "title": "Original Title",
+            "company": "Original Co",
+            "location": "Remote",
+            "full_json_dump": {"version": 1},
+            "status": "pending",
+            "extraction_method": "css",
+            "raw_markdown": "original markdown",
+        }
+    )
+
+    mocker.patch("src.services.crawler.crawl.AsyncWebCrawler", return_value=DummyAsyncWebCrawler())
+    mocker.patch("src.services.crawler.crawl.ETLRepository.get_raw_jobs_count", return_value=1)
+    mocker.patch("src.services.crawler.crawl.ETLRepository.filter_new_links", side_effect=AssertionError("dedup should be bypassed in force-recrawl mode"))
+    mocker.patch.object(Crawler, "extract_single_job", return_value=DummyExtraction(existing_url))
+
+    saved, failed = await crawler.crawl_jobs([{"url": existing_url}], "run-force-recrawl", force_recrawl=True)
+
+    assert saved == 1
+    assert failed == 0
+
+    saved_job = test_db_session.query(RawJobDB).filter_by(url=existing_url).first()
+    assert saved_job is not None
+    assert saved_job.retry_count == 1
+    assert saved_job.title == "Title"

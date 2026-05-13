@@ -120,7 +120,7 @@ class Crawler:
 
         return page_links, None
 
-    async def fetch_job_links(self, run_id: str, limit: int | None = None) -> FetchOutcome:
+    async def fetch_job_links(self, run_id: str, limit: int | None = None, force_recrawl: bool = False) -> FetchOutcome:
         """Fetches job URLs from all configured search pages with pagination.
 
         Iterates through all search URLs (DS_URL, AIE_URL, etc.) and paginates
@@ -130,6 +130,8 @@ class Crawler:
         bind_context(run_id=run_id)
         logger.info("Fetch links phase starting", phase="fetch_links", status="start",
                     search_urls=len(self.search_urls), max_pages=self.max_pages)
+        if force_recrawl:
+            logger.warning("Force-recrawl mode enabled for link discovery", phase="fetch_links", run_id=run_id)
 
         all_links = []
         total_pages_scraped = 0
@@ -177,15 +179,18 @@ class Crawler:
                     if reached_limit:
                         break
 
-            # Dedup against database
+            # Dedup against database unless the caller explicitly requested a dev-only recrawl.
             if not all_links:
                 status = last_error_status or FetchStatus.NO_NEW
                 logger.info("Fetch links completed with no links", phase="fetch_links",
                             status=status.value, pages_scraped=total_pages_scraped)
                 return FetchOutcome(status=status, pages_scraped=total_pages_scraped)
 
-            repo = ETLRepository()
-            new_links = repo.filter_new_links(all_links)
+            if force_recrawl:
+                new_links = all_links
+            else:
+                repo = ETLRepository()
+                new_links = repo.filter_new_links(all_links)
 
             logger.info("Links filtered", phase="fetch_links",
                         total_scraped=len(all_links), new=len(new_links),
@@ -312,7 +317,7 @@ class Crawler:
             logger.warning("Failed to save screenshot", error=str(e))
             return None
 
-    async def crawl_jobs(self, new_links, run_id: str) -> tuple[int, int]:
+    async def crawl_jobs(self, new_links, run_id: str, force_recrawl: bool = False) -> tuple[int, int]:
         """Crawl new_links fetched by fetch_job_links().
         
         Returns:
@@ -322,12 +327,17 @@ class Crawler:
         if not new_links:
             logger.error("Extract phase skipped", phase="extract", status="skip", reason="no_links")
             return 0, 0
+        if force_recrawl:
+            logger.warning("Force-recrawl mode enabled for job crawling", phase="extract", run_id=run_id)
 
         repo = ETLRepository()
         raw_jobs_count = repo.get_raw_jobs_count()
         # Defensive re-check: links may have been saved by a concurrent pipeline run
-        # between fetch_job_links() and crawl_jobs(). Safe to keep.
-        remaining_links = repo.filter_new_links(new_links)
+        # between fetch_job_links() and crawl_jobs(). Safe to keep unless force-recrawl was explicitly requested.
+        if force_recrawl:
+            remaining_links = new_links
+        else:
+            remaining_links = repo.filter_new_links(new_links)
 
         new_links_count = len(new_links)
         already_in_db = new_links_count - len(remaining_links)
