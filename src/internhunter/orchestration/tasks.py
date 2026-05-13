@@ -35,6 +35,7 @@ async def acquire_job_task(url: str, run_id: str) -> bool:
         if job_data:
             job_to_save = {
                 "url": url,
+                "crawl_run_id": run_id,
                 "title": job_data.get("title"),
                 "company": job_data.get("company"),
                 "location": job_data.get("location"),
@@ -68,10 +69,10 @@ async def acquire_job_task(url: str, run_id: str) -> bool:
 
 
 @task
-async def process_pending_jobs_task(limit: int = 100, skip_llm_validation: bool = False):
+async def process_pending_jobs_task(limit: int = 100, skip_llm_validation: bool = False, crawl_run_id: str | None = None):
     """Orchestrates Validation, Transformation, and Loading for all pending jobs."""
     processor = JobProcessor()
-    await processor.process_jobs(limit=limit, skip_llm_validation=skip_llm_validation)
+    await processor.process_jobs(limit=limit, skip_llm_validation=skip_llm_validation, crawl_run_id=crawl_run_id)
 
 
 __all__ = ["fetch_job_links_task", "acquire_job_task", "process_pending_jobs_task"]

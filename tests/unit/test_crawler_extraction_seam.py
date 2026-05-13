@@ -265,6 +265,7 @@ async def test_crawl_jobs_force_recrawl_refreshes_duplicate_raw_job_without_coll
     assert saved_job is not None
     assert saved_job.retry_count == 1
     assert saved_job.title == "Title"
+    assert saved_job.crawl_run_id == "run-force-recrawl"
 
 
 @pytest.mark.asyncio
@@ -296,6 +297,7 @@ async def test_crawl_jobs_saves_blocked_jobs_as_blocked_not_pending(mocker, test
     saved_job = test_db_session.query(RawJobDB).filter_by(url=blocked_url).first()
     assert saved_job is not None
     assert saved_job.status == "blocked"
+    assert saved_job.crawl_run_id == "run-blocked-case"
 
     audit_row = test_db_session.query(AuditJobDB).filter_by(url=blocked_url).first()
     assert audit_row is not None

@@ -30,10 +30,10 @@ async def crawl_jobs_task(links, run_id: str, force_recrawl: bool = False) -> tu
 
 
 @task
-async def process_jobs_task(limit: int, skip_llm_validation: bool = False):
+async def process_jobs_task(limit: int, skip_llm_validation: bool = False, crawl_run_id: str | None = None):
     logger.info("Task: Processing unstructured jobs")
     processor = JobProcessor()
-    return await processor.process_jobs(limit=limit, skip_llm_validation=skip_llm_validation)
+    return await processor.process_jobs(limit=limit, skip_llm_validation=skip_llm_validation, crawl_run_id=crawl_run_id)
 
 
 @flow(name="Job Ingestion Flow")
@@ -62,7 +62,11 @@ async def job_ingestion_flow(limit: int = 20, force_recrawl: bool = False, skip_
     if outcome.is_success and outcome.links:
         crawl_links = outcome.links[:limit] if limit is not None else outcome.links
         extracted, extract_failed = await crawl_jobs_task(crawl_links, run_id, force_recrawl=force_recrawl)
-        processed, process_failed = await process_jobs_task(limit=limit, skip_llm_validation=skip_llm_validation)
+        processed, process_failed = await process_jobs_task(
+            limit=limit,
+            skip_llm_validation=skip_llm_validation,
+            crawl_run_id=run_id,
+        )
 
         repo.save_pipeline_run_summary(
             run_id=run_id,

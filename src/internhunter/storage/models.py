@@ -13,6 +13,7 @@ class RawJobDB(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     url = Column(String, unique=True, nullable=False)
+    crawl_run_id = Column(String, index=True, nullable=True)
     title = Column(String)
     company = Column(String)
     location = Column(String)

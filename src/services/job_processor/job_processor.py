@@ -134,7 +134,7 @@ class JobProcessor():
             parts.append(f"Domain: {', '.join(parsed_result.domain_knowledge)}")
         return "\n".join(parts)
 
-    async def process_jobs(self, limit: int = 100, skip_llm_validation: bool = False):
+    async def process_jobs(self, limit: int = 100, skip_llm_validation: bool = False, crawl_run_id: str | None = None):
         """Process pending raw jobs through validation, LLM transformation, embedding, and loading.
         
         Async with smart rate limiting: only sleeps the remaining interval after
@@ -143,7 +143,12 @@ class JobProcessor():
         Returns:
             (success_count, fail_count)
         """
-        logger.info("Job processing cycle starting", limit=limit, skip_llm_validation=skip_llm_validation)
+        logger.info(
+            "Job processing cycle starting",
+            limit=limit,
+            skip_llm_validation=skip_llm_validation,
+            crawl_run_id=crawl_run_id,
+        )
         if skip_llm_validation:
             logger.warning("LLM validation skipped in local/dev mode", limit=limit)
 
@@ -152,10 +157,11 @@ class JobProcessor():
         repo = ETLRepository()
         
         # Use new production-grade fetch
-        jobs = repo.fetch_pending_raw_jobs(limit=limit)
+        jobs = repo.fetch_pending_raw_jobs(limit=limit, crawl_run_id=crawl_run_id)
         logger.info(
             "Pending raw jobs selected",
             limit=limit,
+            crawl_run_id=crawl_run_id,
             count=len(jobs),
             raw_job_ids=[job.id for job in jobs],
             urls=[job.url for job in jobs],

@@ -397,18 +397,21 @@ async def test_process_jobs_llm_incomplete_failure_is_audited(test_db_session, r
 async def test_process_jobs_prioritizes_refreshed_current_run_jobs(test_db_session, repo, processor, mocker):
     repo.save_raw_job({
         "url": "https://example.com/job/older-pending-process",
+        "crawl_run_id": "run-old",
         "title": "Older Pending Process",
         "raw_markdown": "This is a dummy job description containing over 300 characters. " * 10,
         "status": "pending",
     })
     repo.save_raw_job({
         "url": "https://example.com/job/current-run-process",
+        "crawl_run_id": "run-current",
         "title": "Current Run Process",
         "raw_markdown": "This is a dummy job description containing over 300 characters. " * 10,
         "status": "pending",
     })
     repo.save_raw_job({
         "url": "https://example.com/job/current-run-process",
+        "crawl_run_id": "run-current",
         "title": "Current Run Process Refreshed",
         "raw_markdown": "This is a dummy job description containing over 300 characters. " * 10,
         "status": "pending",
@@ -440,7 +443,7 @@ async def test_process_jobs_prioritizes_refreshed_current_run_jobs(test_db_sessi
     )
     mocker.patch("src.internhunter.embeddings.embedder.Embedder.generate_embedding", return_value=[0.1] * 768)
 
-    success_count, fail_count = await processor.process_jobs(limit=1)
+    success_count, fail_count = await processor.process_jobs(limit=1, crawl_run_id="run-current")
 
     assert success_count == 1
     assert fail_count == 0

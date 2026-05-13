@@ -390,7 +390,10 @@ class Crawler:
                 extraction = await self.extract_single_job(crawler, url)
 
                 if extraction:
-                    if repo.save_raw_job(extraction.to_save_dict()):
+                    job_to_save = extraction.to_save_dict()
+                    job_to_save["crawl_run_id"] = run_id
+
+                    if repo.save_raw_job(job_to_save):
                         saved_count += 1
                         
                         # Handle immediate audit if blocked

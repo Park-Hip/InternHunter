@@ -45,6 +45,7 @@ def test_canonical_etl_repository_writes_raw_job(test_db_session):
     assert repo.save_raw_job(
         {
             "url": "https://example.com/job/storage-boundary",
+            "crawl_run_id": "run-storage-boundary",
             "title": "Storage Boundary Job",
             "company": "Boundary Co",
             "location": "Remote",
@@ -59,12 +60,14 @@ def test_canonical_etl_repository_writes_raw_job(test_db_session):
     assert saved_job is not None
     assert saved_job.title == "Storage Boundary Job"
     assert saved_job.status == "pending"
+    assert saved_job.crawl_run_id == "run-storage-boundary"
 
 
 def test_canonical_etl_repository_refreshes_duplicate_raw_job(test_db_session):
     repo = NewETLRepository()
     first_payload = {
         "url": "https://example.com/job/storage-duplicate",
+        "crawl_run_id": "run-storage-old",
         "title": "Initial Title",
         "company": "Boundary Co",
         "location": "Remote",
@@ -74,6 +77,7 @@ def test_canonical_etl_repository_refreshes_duplicate_raw_job(test_db_session):
     }
     refreshed_payload = {
         "url": "https://example.com/job/storage-duplicate",
+        "crawl_run_id": "run-storage-new",
         "title": "Refreshed Title",
         "company": "Boundary Co 2",
         "location": "Hanoi",
@@ -96,6 +100,7 @@ def test_canonical_etl_repository_refreshes_duplicate_raw_job(test_db_session):
     assert saved_job.full_json_dump == {"version": 2}
     assert saved_job.extraction_method == "raw"
     assert saved_job.raw_markdown == "updated markdown"
+    assert saved_job.crawl_run_id == "run-storage-new"
     assert saved_job.retry_count == 1
 
 
@@ -128,6 +133,7 @@ def test_canonical_etl_repository_prioritizes_refreshed_pending_jobs(test_db_ses
     assert repo.save_raw_job(
         {
             "url": "https://example.com/job/older-pending",
+            "crawl_run_id": "run-old",
             "title": "Older Pending",
             "company": "Boundary Co",
             "location": "Remote",
@@ -138,6 +144,7 @@ def test_canonical_etl_repository_prioritizes_refreshed_pending_jobs(test_db_ses
     assert repo.save_raw_job(
         {
             "url": "https://example.com/job/current-run",
+            "crawl_run_id": "run-current",
             "title": "Current Run",
             "company": "Boundary Co",
             "location": "Remote",
@@ -148,6 +155,7 @@ def test_canonical_etl_repository_prioritizes_refreshed_pending_jobs(test_db_ses
     assert repo.save_raw_job(
         {
             "url": "https://example.com/job/current-run",
+            "crawl_run_id": "run-current",
             "title": "Current Run Refreshed",
             "company": "Boundary Co",
             "location": "Remote",
@@ -162,4 +170,48 @@ def test_canonical_etl_repository_prioritizes_refreshed_pending_jobs(test_db_ses
 
     assert len(pending_jobs) == 1
     assert pending_jobs[0].url == "https://example.com/job/current-run"
+    assert pending_jobs[0].crawl_run_id == "run-current"
     assert pending_jobs[0].retry_count == 1
+
+
+def test_canonical_etl_repository_fetches_pending_jobs_for_crawl_run_id_only(test_db_session):
+    repo = NewETLRepository()
+    assert repo.save_raw_job(
+        {
+            "url": "https://example.com/job/run-a-1",
+            "crawl_run_id": "run-a",
+            "title": "Run A 1",
+            "company": "Boundary Co",
+            "location": "Remote",
+            "full_json_dump": {"foo": "bar"},
+            "status": "pending",
+        }
+    )
+    assert repo.save_raw_job(
+        {
+            "url": "https://example.com/job/run-b-1",
+            "crawl_run_id": "run-b",
+            "title": "Run B 1",
+            "company": "Boundary Co",
+            "location": "Remote",
+            "full_json_dump": {"foo": "bar"},
+            "status": "pending",
+        }
+    )
+    assert repo.save_raw_job(
+        {
+            "url": "https://example.com/job/run-b-2",
+            "crawl_run_id": "run-b",
+            "title": "Run B 2",
+            "company": "Boundary Co",
+            "location": "Remote",
+            "full_json_dump": {"foo": "bar"},
+            "status": "pending",
+        }
+    )
+
+    scoped_jobs = repo.fetch_pending_raw_jobs(limit=10, crawl_run_id="run-b")
+
+    assert len(scoped_jobs) == 2
+    assert {job.crawl_run_id for job in scoped_jobs} == {"run-b"}
+    assert all(job.status == "pending" for job in scoped_jobs)

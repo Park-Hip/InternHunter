@@ -6,6 +6,7 @@ class RawJob(BaseModel):
     """Represents a raw job entry from the database."""
     id: int
     url: str
+    crawl_run_id: Optional[str] = None
     title: Optional[str] = None
     company: Optional[str] = None
     location: Optional[str] = None

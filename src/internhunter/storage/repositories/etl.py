@@ -104,6 +104,7 @@ class ETLRepository:
                 ).scalar_one_or_none()
 
                 if existing:
+                    crawl_run_id = job_data.get("crawl_run_id", existing.crawl_run_id)
                     existing.title = job_data.get("title")
                     existing.company = job_data.get("company")
                     existing.location = job_data.get("location")
@@ -111,18 +112,21 @@ class ETLRepository:
                     existing.status = job_data.get("status", existing.status or "pending")
                     existing.extraction_method = job_data.get("extraction_method", existing.extraction_method or "css")
                     existing.raw_markdown = job_data.get("raw_markdown")
+                    existing.crawl_run_id = crawl_run_id
                     existing.retry_count = (existing.retry_count or 0) + 1
                     session.commit()
                     logger.info(
                         "Existing raw job refreshed",
                         url=job_data.get("url"),
                         raw_job_id=existing.id,
+                        crawl_run_id=crawl_run_id,
                         retry_count=existing.retry_count,
                     )
                     return True
 
                 raw_job = RawJobDB(
                     url=job_data["url"],
+                    crawl_run_id=job_data.get("crawl_run_id"),
                     title=job_data.get("title"),
                     company=job_data.get("company"),
                     location=job_data.get("location"),
@@ -169,6 +173,7 @@ class ETLRepository:
         return RawJob(
             id=row.id,
             url=row.url,
+            crawl_run_id=row.crawl_run_id,
             title=row.title,
             company=row.company,
             location=row.location,
@@ -180,16 +185,14 @@ class ETLRepository:
             created_at=row.created_at.isoformat() if row.created_at else None,
         )
 
-    def fetch_pending_raw_jobs(self, limit: int = 100) -> List[RawJob]:
+    def fetch_pending_raw_jobs(self, limit: int = 100, crawl_run_id: str | None = None) -> List[RawJob]:
         """Fetches jobs that are 'pending' and need processing."""
         with SessionLocal() as session:
             try:
-                statement = (
-                    select(RawJobDB)
-                    .where(RawJobDB.status == "pending")
-                    .order_by(RawJobDB.retry_count.desc(), RawJobDB.id.desc())
-                    .limit(limit)
-                )
+                statement = select(RawJobDB).where(RawJobDB.status == "pending")
+                if crawl_run_id is not None:
+                    statement = statement.where(RawJobDB.crawl_run_id == crawl_run_id)
+                statement = statement.order_by(RawJobDB.retry_count.desc(), RawJobDB.id.desc()).limit(limit)
                 results = session.execute(statement).scalars().all()
                 return [self._row_to_raw_job(row) for row in results]
             except Exception as e:

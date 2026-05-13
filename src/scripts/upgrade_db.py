@@ -14,6 +14,7 @@ def upgrade():
     with engine.connect() as conn:
         # 1. Add columns to raw_jobs if they don't exist
         columns_to_add = [
+            ("crawl_run_id", "VARCHAR", "NULL"),
             ("status", "VARCHAR", "'pending'"),
             ("extraction_method", "VARCHAR", "'css'"),
             ("raw_markdown", "TEXT", "NULL"),
@@ -32,6 +33,13 @@ def upgrade():
                     conn.commit()
             except Exception as e:
                 print(f"Failed to add column {col_name}: {e}")
+
+        try:
+            print("Creating crawl_run_id index if needed...")
+            conn.execute(sa.text("CREATE INDEX IF NOT EXISTS idx_raw_jobs_crawl_run_id ON raw_jobs (crawl_run_id)"))
+            conn.commit()
+        except Exception as e:
+            print(f"Failed to create crawl_run_id index: {e}")
 
         # 2. Create audit_jobs table if it doesn't exist
         try:

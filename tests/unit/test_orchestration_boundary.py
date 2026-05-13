@@ -32,14 +32,17 @@ def test_orchestration_imports_resolve():
 async def test_job_ingestion_flow_limits_crawl_to_requested_job_count(mocker):
     captured = {
         "fetch_limit": None,
+        "fetch_run_id": None,
         "crawl_count": None,
         "process_limit": None,
+        "process_crawl_run_id": None,
         "force_recrawl": None,
         "crawl_force_recrawl": None,
         "skip_llm_validation": None,
     }
 
     async def fake_fetch_links_task(run_id, limit=None, force_recrawl=False):
+        captured["fetch_run_id"] = run_id
         captured["fetch_limit"] = limit
         captured["force_recrawl"] = force_recrawl
         return FetchOutcome(
@@ -59,9 +62,10 @@ async def test_job_ingestion_flow_limits_crawl_to_requested_job_count(mocker):
         captured["crawl_force_recrawl"] = force_recrawl
         return len(links), 0
 
-    async def fake_process_jobs_task(limit, skip_llm_validation=False):
+    async def fake_process_jobs_task(limit, skip_llm_validation=False, crawl_run_id=None):
         captured["process_limit"] = limit
         captured["skip_llm_validation"] = skip_llm_validation
+        captured["process_crawl_run_id"] = crawl_run_id
         return 3, 0
 
     class DummyRepo:
@@ -85,6 +89,7 @@ async def test_job_ingestion_flow_limits_crawl_to_requested_job_count(mocker):
     assert captured["crawl_force_recrawl"] is True
     assert captured["process_limit"] == 3
     assert captured["skip_llm_validation"] is True
+    assert captured["process_crawl_run_id"] == captured["fetch_run_id"]
 
 
 @pytest.mark.asyncio
@@ -104,7 +109,7 @@ async def test_job_ingestion_flow_skips_when_no_new_links_after_dedup(mocker):
         captured["crawl_called"] = True
         return len(links), 0
 
-    async def fake_process_jobs_task(limit, skip_llm_validation=False):
+    async def fake_process_jobs_task(limit, skip_llm_validation=False, crawl_run_id=None):
         captured["process_called"] = True
         return 0, 0
 
@@ -145,7 +150,7 @@ async def test_job_ingestion_flow_skips_when_fetch_links_fails(mocker):
         captured["crawl_called"] = True
         return len(links), 0
 
-    async def fake_process_jobs_task(limit, skip_llm_validation=False):
+    async def fake_process_jobs_task(limit, skip_llm_validation=False, crawl_run_id=None):
         captured["process_called"] = True
         return 0, 0
 
