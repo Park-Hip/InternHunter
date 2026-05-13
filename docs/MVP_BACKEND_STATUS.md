@@ -13,6 +13,7 @@ The following backend slices are working end to end in the local environment:
 5. Semantic search
 6. Resume upload -> embedding
 7. Resume matching -> jobs
+8. API demo
 
 ## Supported Local Commands
 
@@ -46,6 +47,20 @@ The simplest current smoke path uses the chat tool layer directly:
 uv run python -c "from src.services.chat.tools import execute_upload_resume, execute_match_resume; user_id='smoke-user'; resume='Python data scientist with machine learning, SQL, NLP, statistics, FastAPI, and data visualization experience.'; print(execute_upload_resume(user_id, resume)); print(execute_match_resume(user_id, limit=5))"
 ```
 
+### API demo
+
+Run the local demo API:
+
+```powershell
+uv run uvicorn src.internhunter.api.app:app --reload
+```
+
+Available endpoints:
+
+1. `GET /health`
+2. `GET /jobs/search`
+3. `POST /resume/match`
+
 ## Required Environment
 
 Minimum required environment:
@@ -57,6 +72,7 @@ Still needed in some paths:
 
 1. Groq/Gemini for LLM validation and extraction when LLM validation is enabled
 2. Groq/Gemini for chat-tool paths that use LLM routing
+3. Gemini API key for the `/resume/match` demo endpoint
 
 Notes:
 
@@ -74,6 +90,9 @@ The MVP backend works, but the following limitations are still known:
 5. `--skip-llm-validation` is dev-only and should not be treated as a production mode.
 6. There is no UI yet.
 7. There is no polished API demo yet.
+8. `/jobs/search` currently uses DB criteria matching first, with a recent clean-job fallback, not semantic query embedding yet.
+9. `/resume/match` needs a Gemini embedding key.
+10. There is no auth.
 
 ## Verification Commands
 
@@ -101,6 +120,12 @@ uv run python src/scripts/semantic_search_smoke.py
 uv run python -c "from src.services.chat.tools import execute_upload_resume, execute_match_resume; user_id='smoke-user'; resume='Python data scientist with machine learning, SQL, NLP, statistics, FastAPI, and data visualization experience.'; print(execute_upload_resume(user_id, resume)); print(execute_match_resume(user_id, limit=5))"
 ```
 
+### API demo smoke
+
+```powershell
+uv run uvicorn src.internhunter.api.app:app --reload
+```
+
 ## Next Recommended Milestone
 
 The next best milestone is to build a simple API or minimal UI demo around:
@@ -109,3 +134,46 @@ The next best milestone is to build a simple API or minimal UI demo around:
 2. resume matching
 
 That would make the current backend capabilities easier to validate and share without needing the full agent/chat experience.
+
+## API Demo
+
+The minimal local demo API is now available with these endpoints:
+
+### `GET /health`
+
+```powershell
+curl http://127.0.0.1:8000/health
+```
+
+### `GET /jobs/search`
+
+```powershell
+curl "http://127.0.0.1:8000/jobs/search?query=data%20scientist&limit=5"
+```
+
+### `POST /resume/match`
+
+```powershell
+curl -X POST http://127.0.0.1:8000/resume/match `
+  -H "Content-Type: application/json" `
+  -d "{\"user_id\":\"demo-user\",\"resume_text\":\"Python data scientist with machine learning, SQL, NLP, statistics, FastAPI, and data visualization experience.\",\"limit\":5}"
+```
+
+### Current MVP Status
+
+The backend MVP is now working across:
+
+1. ETL
+2. DB search
+3. semantic search
+4. resume matching
+5. API demo
+
+### API Demo Limitations
+
+1. No auth.
+2. No frontend.
+3. `/jobs/search` uses DB criteria matching plus a recent clean-job fallback, not semantic query embedding yet.
+4. `/resume/match` needs a Gemini embedding key.
+5. TopCV may block crawling.
+6. `match_score` still appears coarse.
